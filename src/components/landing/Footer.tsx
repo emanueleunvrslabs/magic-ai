@@ -23,7 +23,9 @@ export const Footer = () => {
           <span className="text-white/20">|</span>
 
           {/* Copyright */}
-          <span className="whitespace-nowrap">© {new Date().getFullYear()} Unvrs Labs</span>
+          <span className="whitespace-nowrap">© {new Date().getFullYear()}{" "}
+            <a href="https://www.unvrslabs.dev" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors font-medium text-foreground">Unvrs Labs</a>
+          </span>
 
           <span className="text-white/20">|</span>
 
