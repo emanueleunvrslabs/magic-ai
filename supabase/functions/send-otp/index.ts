@@ -33,8 +33,8 @@ serve(async (req) => {
       });
     }
 
-    // Clean phone number (keep only digits and leading +)
-    const cleanPhone = phone.replace(/[^\\d+]/g, '');
+    // Clean phone number (keep only digits)
+    const cleanPhone = phone.replace(/[^\d]/g, '');
 
     // Generate 6-digit OTP
     const otp = String(Math.floor(100000 + Math.random() * 900000));
@@ -64,7 +64,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: cleanPhone,
+        to: `${cleanPhone}@s.whatsapp.net`,
         text: `Your Magic AI verification code is: ${otp}\n\nThis code expires in 5 minutes.`,
       }),
     });
