@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Image, Video, Sparkles } from "lucide-react";
+import { Image, Video, Sparkles, Users } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import img1 from "@/assets/gallery/img1.jpg";
 import img2 from "@/assets/gallery/img2.jpg";
 import img5 from "@/assets/gallery/img5.jpg";
@@ -8,15 +9,34 @@ import vid2 from "@/assets/gallery/vid2.mp4";
 import vid3 from "@/assets/gallery/vid3.mp4";
 
 const galleryItems = [
-  { src: img1, label: "Nano Banana Pro", type: "image" as const, span: "row-span-1" },
-  { src: img2, label: "Nano Banana Pro", type: "image" as const, span: "row-span-2" },
-  { src: vid1, label: "Veo 3.1", type: "video" as const, span: "row-span-1" },
-  { src: vid2, label: "Kling", type: "video" as const, span: "row-span-1" },
-  { src: img5, label: "Nano Banana Pro", type: "image" as const, span: "row-span-2" },
-  { src: vid3, label: "Veo 3.1", type: "video" as const, span: "row-span-1" },
+  { src: img1, label: "Nano Banana Pro", type: "image" as const },
+  { src: img2, label: "Nano Banana Pro", type: "image" as const },
+  { src: vid1, label: "Veo 3.1", type: "video" as const },
+  { src: vid2, label: "Kling", type: "video" as const },
+  { src: img5, label: "Nano Banana Pro", type: "image" as const },
+  { src: vid3, label: "Veo 3.1", type: "video" as const },
 ];
 
+function useLiveCounter(base: number) {
+  const [count, setCount] = useState(base);
+  const countRef = useRef(base);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Randomly fluctuate: +1 to +3 or -1, biased toward increase
+      const delta = Math.random() < 0.15 ? -1 : Math.ceil(Math.random() * 3);
+      countRef.current = Math.max(base - 200, countRef.current + delta);
+      setCount(countRef.current);
+    }, 2000 + Math.random() * 3000);
+    return () => clearInterval(interval);
+  }, [base]);
+
+  return count;
+}
+
 export const HeroGallery = () => {
+  const liveUsers = useLiveCounter(18699);
+
   return (
     <section className="relative pt-32 pb-20 px-4">
       <div className="container mx-auto max-w-6xl">
@@ -43,12 +63,34 @@ export const HeroGallery = () => {
           </p>
         </motion.div>
 
-        {/* Gallery Grid */}
+        {/* Live users counter */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+          className="flex items-center justify-center mb-6"
+        >
+          <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full liquid-glass">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+            </span>
+            <Users className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold text-foreground tabular-nums">
+              {liveUsers.toLocaleString()}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              utenti stanno generando contenuti
+            </span>
+          </div>
+        </motion.div>
+
+        {/* Gallery Grid — uniform height */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[180px] md:auto-rows-[220px]"
+          className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[200px] md:auto-rows-[240px]"
         >
           {galleryItems.map((item, index) => (
             <motion.div
@@ -56,7 +98,7 @@ export const HeroGallery = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-              className={`relative group rounded-2xl overflow-hidden cursor-pointer ${item.span}`}
+              className="relative group rounded-2xl overflow-hidden cursor-pointer"
             >
               {item.type === "video" ? (
                 <video
