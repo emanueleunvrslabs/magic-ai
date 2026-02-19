@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginDialog } from "@/components/auth/LoginDialog";
-import { ProfileDialog } from "@/components/auth/ProfileDialog";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -17,7 +16,7 @@ export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
+  const navigate = useNavigate();
   const location = useLocation();
   const activeLink = location.pathname;
   const { user } = useAuth();
@@ -36,7 +35,7 @@ export const Navbar = () => {
 
   const handleAuthButton = () => {
     if (user) {
-      setProfileOpen(true);
+      navigate("/profile");
     } else {
       setLoginOpen(true);
     }
@@ -215,7 +214,6 @@ export const Navbar = () => {
 
       {/* Dialogs */}
       <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
-      <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />
     </>
   );
 };
