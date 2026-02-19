@@ -169,7 +169,7 @@ const ImageGenerate = () => {
               transition={{ delay: 0.1 }}
             >
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div className="flex justify-start mb-8">
+                <div className="flex justify-center mb-8">
                   <div className="liquid-glass-nav rounded-full p-1.5 flex items-center gap-1"
                     style={{
                       boxShadow: '0 4px 24px hsl(0 0% 0% / 0.15), inset 0 1px 0 0 hsl(0 0% 100% / 0.08)'
