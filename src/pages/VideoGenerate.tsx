@@ -533,7 +533,7 @@ const VideoGenerate = () => {
                       className="min-h-[80px] bg-input/50 border-border/50 rounded-xl resize-none focus:border-primary"
                     />
 
-                    {/* Controls row */}
+                    {/* Controls row - Selects */}
                     <div className="flex flex-wrap items-end gap-4">
                       {config?.aspectRatios?.length > 0 && (
                         <div className="space-y-1.5 flex-1 min-w-[80px]">
@@ -583,34 +583,37 @@ const VideoGenerate = () => {
                         </div>
                       )}
 
-                      {config?.showAudio && (
-                        <div className="flex items-center gap-2 pb-0.5">
-                          <Switch checked={generateAudio} onCheckedChange={setGenerateAudio} />
-                          <Label className="text-foreground/70 text-xs font-medium">Audio</Label>
-                        </div>
-                      )}
-
-                      {config?.showAutoFix && (
-                        <div className="flex items-center gap-2 pb-0.5">
-                          <Switch checked={autoFix} onCheckedChange={setAutoFix} />
-                          <Label className="text-foreground/70 text-xs font-medium">Auto Fix</Label>
-                        </div>
-                      )}
-
                       {config?.showCfgScale && (
                         <div className="space-y-1.5 min-w-[140px]">
                           <Label className="text-foreground/70 text-xs font-medium">CFG Scale: {cfgScale}</Label>
                           <Slider value={[cfgScale]} onValueChange={([v]) => setCfgScale(v)} min={0} max={1} step={0.1} className="w-full" />
                         </div>
                       )}
-
-                      {activeMode === "video-edit" && (
-                        <div className="flex items-center gap-2 pb-0.5">
-                          <Switch checked={keepAudio} onCheckedChange={setKeepAudio} />
-                          <Label className="text-foreground/70 text-xs font-medium">Keep Audio</Label>
-                        </div>
-                      )}
                     </div>
+
+                    {/* Controls row - Toggles */}
+                    {(config?.showAudio || config?.showAutoFix || activeMode === "video-edit") && (
+                      <div className="flex flex-wrap items-center gap-4">
+                        {config?.showAudio && (
+                          <div className="flex items-center gap-2">
+                            <Switch checked={generateAudio} onCheckedChange={setGenerateAudio} />
+                            <Label className="text-foreground/70 text-xs font-medium">Audio</Label>
+                          </div>
+                        )}
+                        {config?.showAutoFix && (
+                          <div className="flex items-center gap-2">
+                            <Switch checked={autoFix} onCheckedChange={setAutoFix} />
+                            <Label className="text-foreground/70 text-xs font-medium">Auto Fix</Label>
+                          </div>
+                        )}
+                        {activeMode === "video-edit" && (
+                          <div className="flex items-center gap-2">
+                            <Switch checked={keepAudio} onCheckedChange={setKeepAudio} />
+                            <Label className="text-foreground/70 text-xs font-medium">Keep Audio</Label>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {config?.showNegativePrompt && (
                       <Textarea
