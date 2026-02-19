@@ -441,7 +441,7 @@ const ResultsArea = ({
   error: string;
   onDownload: (url: string, i: number) => void;
 }) => (
-  <div className="min-h-[300px] flex items-center justify-center">
+  <div className="min-h-[200px]">
     {loading ? (
       <div className="flex flex-col items-center gap-4 text-muted-foreground py-16">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -453,12 +453,7 @@ const ResultsArea = ({
         <p className="text-sm mt-1 text-destructive/80">{error}</p>
       </div>
     ) : results.length > 0 ? (
-      <div className={cn(
-        "gap-4 w-full",
-        results.length === 1
-          ? "flex justify-center"
-          : "grid grid-cols-1 sm:grid-cols-2"
-      )}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         <AnimatePresence>
           {results.map((img, i) => (
             <motion.div
@@ -466,21 +461,18 @@ const ResultsArea = ({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
-              className="relative group"
+              className="relative group aspect-square"
             >
               <img
                 src={img.url}
                 alt={`Generated ${i + 1}`}
-                className={cn(
-                  "rounded-2xl border border-border/30 shadow-lg object-cover",
-                  results.length === 1 ? "max-h-[600px] w-auto mx-auto" : "w-full aspect-square"
-                )}
+                className="w-full h-full rounded-xl border border-border/30 shadow-md object-cover"
               />
               <button
                 onClick={() => onDownload(img.url, i)}
-                className="absolute bottom-3 right-3 p-2.5 rounded-full liquid-glass opacity-0 group-hover:opacity-100 transition-opacity text-foreground hover:text-primary"
+                className="absolute bottom-2 right-2 p-2 rounded-full liquid-glass opacity-0 group-hover:opacity-100 transition-opacity text-foreground hover:text-primary"
               >
-                <Download className="w-5 h-5" />
+                <Download className="w-4 h-4" />
               </button>
             </motion.div>
           ))}
