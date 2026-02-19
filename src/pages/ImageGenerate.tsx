@@ -14,6 +14,9 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useGeneration } from "@/contexts/GenerationContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { LoginDialog } from "@/components/auth/LoginDialog";
+import { NoCreditsDialog } from "@/components/credits/NoCreditsDialog";
 
 const ASPECT_RATIOS = [
   { label: "Auto", value: "auto" },
@@ -43,8 +46,11 @@ const OUTPUT_FORMATS = [
 
 const ImageGenerate = () => {
   const navigate = useNavigate();
-  const { imageResults, imageJobs, generateImages, deleteMedia } = useGeneration();
+  const { user } = useAuth();
+  const { imageResults, imageJobs, generateImages, deleteMedia, checkCanGenerate } = useGeneration();
   const [activeTab, setActiveTab] = useState("generate");
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [noCreditsOpen, setNoCreditsOpen] = useState(false);
 
   // Text-to-image state
   const [prompt, setPrompt] = useState("");
@@ -86,8 +92,11 @@ const ImageGenerate = () => {
     setEditImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) return;
+    if (!user) { setLoginOpen(true); return; }
+    const ok = await checkCanGenerate();
+    if (!ok) { setNoCreditsOpen(true); return; }
     setError("");
     generateImages({
       mode: "generate",
@@ -100,8 +109,11 @@ const ImageGenerate = () => {
     });
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!editPrompt.trim() || editImages.length === 0) return;
+    if (!user) { setLoginOpen(true); return; }
+    const ok = await checkCanGenerate();
+    if (!ok) { setNoCreditsOpen(true); return; }
     setError("");
     generateImages({
       mode: "edit",
@@ -402,6 +414,9 @@ const ImageGenerate = () => {
 
         <Footer />
       </div>
+
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      <NoCreditsDialog open={noCreditsOpen} onOpenChange={setNoCreditsOpen} />
     </div>
   );
 };

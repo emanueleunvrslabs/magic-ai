@@ -17,6 +17,7 @@ interface GenerationContextType {
   generateImages: (params: Record<string, unknown>) => void;
   generateVideo: (params: Record<string, unknown>) => void;
   deleteMedia: (url: string, type: "image" | "video") => Promise<void>;
+  checkCanGenerate: () => Promise<boolean>;
 }
 
 const GenerationContext = createContext<GenerationContextType>({
@@ -27,6 +28,7 @@ const GenerationContext = createContext<GenerationContextType>({
   generateImages: () => {},
   generateVideo: () => {},
   deleteMedia: async () => {},
+  checkCanGenerate: async () => false,
 });
 
 export const useGeneration = () => useContext(GenerationContext);
@@ -160,10 +162,20 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
     },
     [user]
   );
+  const checkCanGenerate = useCallback(async (): Promise<boolean> => {
+    if (!user) return false;
+    const [creditsRes, keysRes] = await Promise.all([
+      supabase.from("user_credits").select("balance").eq("user_id", user.id).single(),
+      supabase.from("user_api_keys").select("provider, is_valid").eq("user_id", user.id).eq("provider", "fal").eq("is_valid", true),
+    ]);
+    const hasCredits = (creditsRes.data?.balance ?? 0) > 0;
+    const hasOwnKey = (keysRes.data?.length ?? 0) > 0;
+    return hasCredits || hasOwnKey;
+  }, [user]);
 
   return (
     <GenerationContext.Provider
-      value={{ imageResults, videoResults, imageJobs, videoJobs, generateImages, generateVideo, deleteMedia }}
+      value={{ imageResults, videoResults, imageJobs, videoJobs, generateImages, generateVideo, deleteMedia, checkCanGenerate }}
     >
       {children}
     </GenerationContext.Provider>
