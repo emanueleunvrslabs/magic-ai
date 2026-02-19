@@ -264,11 +264,11 @@ const Profile = () => {
     const loadKeys = async () => {
       const { data } = await supabase
         .from("user_api_keys")
-        .select("provider, api_key, is_valid")
+        .select("provider, is_valid")
         .eq("user_id", user.id);
       if (data) {
         data.forEach((row: any) => {
-          const masked = row.api_key.slice(0, 8) + "..." + row.api_key.slice(-4);
+          const masked = "••••••••••••";
           if (row.provider === "fal") setFal((prev) => ({ ...prev, apiKey: masked, connected: row.is_valid }));
           else if (row.provider === "openai") setOpenai((prev) => ({ ...prev, apiKey: masked, connected: row.is_valid }));
         });
