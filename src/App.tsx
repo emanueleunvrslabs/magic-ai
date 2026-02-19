@@ -9,6 +9,7 @@ import { RequireAuth } from "@/components/auth/RequireAuth";
 import Index from "./pages/Index";
 import ImageGenerate from "./pages/ImageGenerate";
 import VideoGenerate from "./pages/VideoGenerate";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/image" element={<RequireAuth><ImageGenerate /></RequireAuth>} />
               <Route path="/video" element={<RequireAuth><VideoGenerate /></RequireAuth>} />
+              <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
