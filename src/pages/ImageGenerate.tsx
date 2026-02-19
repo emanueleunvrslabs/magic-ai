@@ -271,16 +271,16 @@ const ImageGenerate = () => {
                           <Button
                             onClick={handleGenerate}
                             disabled={loading || !prompt.trim()}
-                            className="w-full md:w-auto btn-premium rounded-xl h-12 md:h-9 text-base md:text-sm md:px-6"
+                            className="btn-premium rounded-xl h-11 w-full sm:w-auto sm:self-end px-8"
                           >
                             {loading ? (
                               <>
-                                <Loader2 className="w-5 md:w-4 h-5 md:h-4 animate-spin mr-2" />
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
                                 Generating...
                               </>
                             ) : (
                               <>
-                                <Wand2 className="w-5 md:w-4 h-5 md:h-4 mr-2" />
+                                <Wand2 className="w-4 h-4 mr-2" />
                                 Generate
                               </>
                             )}
@@ -383,25 +383,23 @@ const ImageGenerate = () => {
                             </Select>
                           </div>
                         </div>
-                        <div className="flex justify-end">
-                          <Button
-                            onClick={handleEdit}
-                            disabled={loading || !editPrompt.trim() || editImages.length === 0}
-                            className="w-full md:w-auto btn-premium rounded-xl h-12 md:h-9 text-base md:text-sm md:px-6"
-                          >
-                            {loading ? (
-                              <>
-                                <Loader2 className="w-5 md:w-4 h-5 md:h-4 animate-spin mr-2" />
-                                Editing...
-                              </>
-                            ) : (
-                              <>
-                                <Wand2 className="w-5 md:w-4 h-5 md:h-4 mr-2" />
-                                Edit Image
-                              </>
-                            )}
-                          </Button>
-                        </div>
+                        <Button
+                          onClick={handleEdit}
+                          disabled={loading || !editPrompt.trim() || editImages.length === 0}
+                          className="btn-premium rounded-xl h-11 w-full sm:w-auto sm:self-end px-8"
+                        >
+                          {loading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                              Editing...
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 className="w-4 h-4 mr-2" />
+                              Edit Image
+                            </>
+                          )}
+                        </Button>
                       </div>
                     </div>
 
