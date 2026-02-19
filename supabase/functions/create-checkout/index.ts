@@ -9,12 +9,12 @@ const corsHeaders = {
 };
 
 const CREDIT_PACKAGES: Record<string, { priceId: string; credits: number }> = {
-  "10": { priceId: "price_1T2Z1QAKRf8sKzTvtzvVaIiy", credits: 10 },
-  "20": { priceId: "price_1T2Z1hAKRf8sKzTvo0IP74V5", credits: 20 },
-  "50": { priceId: "price_1T2Z1sAKRf8sKzTvPQDaHNLE", credits: 50 },
-  "100": { priceId: "price_1T2Z24AKRf8sKzTvaZghgRE5", credits: 100 },
-  "250": { priceId: "price_1T2Z2IAKRf8sKzTvpABsGr2d", credits: 250 },
-  "500": { priceId: "price_1T2Z2TAKRf8sKzTviprb2Rgp", credits: 500 },
+  "10": { priceId: "price_1T2aE5AX7XT7O7omUAwCSy22", credits: 10 },
+  "20": { priceId: "price_1T2aEKAX7XT7O7omDwHFxbP9", credits: 20 },
+  "50": { priceId: "price_1T2aEXAX7XT7O7omyp0Og56o", credits: 50 },
+  "100": { priceId: "price_1T2aErAX7XT7O7omxTQ9r9Xp", credits: 100 },
+  "250": { priceId: "price_1T2aF3AX7XT7O7ompAE95i2M", credits: 250 },
+  "500": { priceId: "price_1T2aFGAX7XT7O7omYm0lZJtA", credits: 500 },
 };
 
 serve(async (req) => {
