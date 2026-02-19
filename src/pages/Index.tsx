@@ -1,10 +1,4 @@
 import { Navbar } from "@/components/layout/Navbar";
-import { HeroSection } from "@/components/landing/HeroSection";
-import { BandiMarquee } from "@/components/landing/BandiMarquee";
-import { ProblemSolutionSection } from "@/components/landing/ProblemSolutionSection";
-import { FeaturesSection } from "@/components/landing/FeaturesSection";
-import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
-import { PricingSection } from "@/components/landing/PricingSection";
 import { Footer } from "@/components/landing/Footer";
 
 const Index = () => {
@@ -20,17 +14,10 @@ const Index = () => {
       <div className="grain-overlay" />
       
       {/* Content */}
-      <div className="relative z-10">
+      <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />
         
-        <main>
-          <HeroSection />
-          <BandiMarquee />
-          <ProblemSolutionSection />
-          <FeaturesSection />
-          <HowItWorksSection />
-          <PricingSection />
-        </main>
+        <main className="flex-1" />
         
         <Footer />
       </div>
