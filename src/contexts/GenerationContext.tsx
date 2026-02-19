@@ -35,6 +35,18 @@ export const useGeneration = () => useContext(GenerationContext);
 
 let jobCounter = 0;
 
+/** Fetch the user's own fal API key if they have one */
+async function getUserFalKey(userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("user_api_keys")
+    .select("api_key")
+    .eq("user_id", userId)
+    .eq("provider", "fal")
+    .eq("is_valid", true)
+    .limit(1);
+  return data && data.length > 0 ? data[0].api_key : null;
+}
+
 export const GenerationProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const [imageResults, setImageResults] = useState<Array<{ url: string }>>([]);
@@ -87,18 +99,19 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
 
       (async () => {
         try {
-          const { data, error } = await supabase.functions.invoke("fal-ai-generate", { body: params });
+          // Check if user has own API key
+          const userKey = user ? await getUserFalKey(user.id) : null;
+          const bodyWithKey = userKey ? { ...params, userApiKey: userKey } : params;
+
+          const { data, error } = await supabase.functions.invoke("fal-ai-generate", { body: bodyWithKey });
           console.log("fal-ai-generate response:", JSON.stringify(data));
           if (error) throw new Error(error.message);
           if (data?.error) throw new Error(data.error);
 
-          // fal.ai may return images under "images" or "output" depending on model
           const rawImages = data?.images || data?.output?.images || data?.data?.images || [];
           const newImages: Array<{ url: string }> = Array.isArray(rawImages)
             ? rawImages.map((img: any) => ({ url: typeof img === "string" ? img : img.url }))
             : [];
-          
-          console.log("Parsed images:", newImages.length, newImages);
           
           if (newImages.length > 0) {
             setImageResults((prev) => [...newImages, ...prev]);
@@ -113,7 +126,7 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
         }
       })();
     },
-    [saveMedia]
+    [saveMedia, user]
   );
 
   const generateVideo = useCallback(
@@ -124,7 +137,10 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
 
       (async () => {
         try {
-          const { data, error } = await supabase.functions.invoke("fal-ai-video", { body: params });
+          const userKey = user ? await getUserFalKey(user.id) : null;
+          const bodyWithKey = userKey ? { ...params, userApiKey: userKey } : params;
+
+          const { data, error } = await supabase.functions.invoke("fal-ai-video", { body: bodyWithKey });
           if (error) throw new Error(error.message);
           if (data?.error) throw new Error(data.error);
 
@@ -140,18 +156,16 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
         }
       })();
     },
-    [saveMedia]
+    [saveMedia, user]
   );
 
   const deleteMedia = useCallback(
     async (url: string, type: "image" | "video") => {
-      // Remove from state immediately
       if (type === "image") {
         setImageResults((prev) => prev.filter((item) => item.url !== url));
       } else {
         setVideoResults((prev) => prev.filter((item) => item.url !== url));
       }
-      // Remove from DB
       if (user) {
         await supabase
           .from("generated_media")
@@ -162,6 +176,7 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
     },
     [user]
   );
+
   const checkCanGenerate = useCallback(async (): Promise<boolean> => {
     if (!user) return false;
     const [creditsRes, keysRes] = await Promise.all([
