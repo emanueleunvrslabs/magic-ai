@@ -258,18 +258,6 @@ const VideoGenerate = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <div className="flex justify-center mb-4">
-                <Select value={model} onValueChange={setModel}>
-                  <SelectTrigger className="w-48 liquid-glass-nav border-border/50 rounded-full text-sm">
-                    <SelectValue placeholder="Model" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border-border z-50">
-                    {VIDEO_MODELS.map((m) => (
-                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
               <div className="flex justify-center mb-8">
                 <div
                   className="liquid-glass-nav rounded-full p-1.5 flex items-center gap-1 flex-wrap justify-center"
@@ -277,6 +265,17 @@ const VideoGenerate = () => {
                     boxShadow: '0 4px 24px hsl(0 0% 0% / 0.15), inset 0 1px 0 0 hsl(0 0% 100% / 0.08)',
                   }}
                 >
+                  <Select value={model} onValueChange={setModel}>
+                    <SelectTrigger className="px-4 py-2 text-sm font-medium rounded-full liquid-glass border-none min-w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border z-50">
+                      {VIDEO_MODELS.map((m) => (
+                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="w-px h-6 bg-border/30" />
                   {VIDEO_MODES.map((mode) => (
                     <motion.button
                       key={mode.value}
