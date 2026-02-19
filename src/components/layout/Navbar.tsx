@@ -7,7 +7,7 @@ import { Link, useLocation } from "react-router-dom";
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Image", href: "/image" },
-  { label: "Video", href: "#video" },
+  { label: "Video", href: "/video" },
 ];
 
 export const Navbar = () => {
