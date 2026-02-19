@@ -624,7 +624,7 @@ const VideoResultsArea = ({
 
       {/* Lightbox preview */}
       <Dialog open={!!previewUrl} onOpenChange={() => setPreviewUrl(null)}>
-        <DialogContent className="max-w-4xl w-full p-2 bg-background/95 backdrop-blur-xl border-none shadow-none">
+        <DialogContent className="max-w-4xl w-full p-0 pt-10 pb-2 px-2 bg-background/95 backdrop-blur-xl border-none shadow-none">
           {previewUrl && (
             <video
               src={previewUrl}
