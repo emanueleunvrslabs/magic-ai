@@ -50,7 +50,7 @@ const ImageGenerate = () => {
   const [prompt, setPrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [resolution, setResolution] = useState("1K");
-  const [outputFormat, setOutputFormat] = useState("png");
+  const [outputFormat, setOutputFormat] = useState("jpeg");
   const [numImages, setNumImages] = useState(1);
 
   // Edit state
