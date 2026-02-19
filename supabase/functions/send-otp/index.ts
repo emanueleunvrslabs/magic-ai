@@ -36,6 +36,21 @@ serve(async (req) => {
     // Clean phone number (keep only digits)
     const cleanPhone = phone.replace(/[^\d]/g, '');
 
+    // Rate limiting: max 3 OTP requests per phone per 5 minutes
+    const { data: recentOtps } = await supabase
+      .from('phone_otps')
+      .select('created_at')
+      .eq('phone', cleanPhone)
+      .gte('created_at', new Date(Date.now() - 5 * 60 * 1000).toISOString())
+      .order('created_at', { ascending: false });
+
+    if (recentOtps && recentOtps.length >= 3) {
+      // Return success to prevent phone enumeration
+      return new Response(JSON.stringify({ success: true, message: 'OTP sent' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Generate 6-digit OTP
     const otp = String(Math.floor(100000 + Math.random() * 900000));
 
