@@ -104,7 +104,7 @@ const ImageGenerate = () => {
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
 
-      setResults(prev => [...prev, ...(data?.images || [])]);
+      setResults(prev => [...(data?.images || []), ...prev]);
     } catch (err: any) {
       setError(err.message || "Generation failed");
     } finally {
@@ -133,7 +133,7 @@ const ImageGenerate = () => {
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
 
-      setResults(prev => [...prev, ...(data?.images || [])]);
+      setResults(prev => [...(data?.images || []), ...prev]);
     } catch (err: any) {
       setError(err.message || "Edit failed");
     } finally {
@@ -481,6 +481,18 @@ const ResultsArea = ({
         ) : results.length > 0 || loading ? (
           <div className="liquid-glass-card-sm p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             <AnimatePresence>
+              {loading && (
+                <motion.div
+                  key="loader"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="aspect-square rounded-xl liquid-glass flex flex-col items-center justify-center gap-3"
+                >
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-xs text-muted-foreground">Generating...</p>
+                </motion.div>
+              )}
               {results.map((img, i) => (
                 <motion.div
                   key={img.url}
@@ -528,18 +540,6 @@ const ResultsArea = ({
                   </div>
                 </motion.div>
               ))}
-              {loading && (
-                <motion.div
-                  key="loader"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="aspect-square rounded-xl liquid-glass flex flex-col items-center justify-center gap-3"
-                >
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  <p className="text-xs text-muted-foreground">Generating...</p>
-                </motion.div>
-              )}
             </AnimatePresence>
           </div>
         ) : (
