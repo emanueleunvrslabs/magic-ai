@@ -49,6 +49,7 @@ serve(async (req) => {
     }
 
     const queueUrl = `https://queue.fal.run/${endpointId}`;
+    console.log('Submitting to:', queueUrl, 'mode:', mode, 'params:', JSON.stringify(params));
 
     // Submit to queue
     const submitRes = await fetch(queueUrl, {
@@ -70,6 +71,7 @@ serve(async (req) => {
     }
 
     const submitData = await safeJson(submitRes);
+    console.log('Submit response:', JSON.stringify(submitData));
     const request_id = submitData.request_id;
 
     if (!request_id) {
@@ -80,19 +82,23 @@ serve(async (req) => {
       });
     }
 
-    // Poll for result
-    const baseUrl = `https://queue.fal.run/${endpointId}/requests/${request_id}`;
+    // Use URLs from submit response if available, otherwise construct them
+    const responseUrl = submitData.response_url || `https://queue.fal.run/${endpointId}/requests/${request_id}`;
+    const statusUrl = submitData.status_url || `${responseUrl}/status`;
+    console.log('Polling status at:', statusUrl);
+    console.log('Will fetch result from:', responseUrl);
+
     let attempts = 0;
     const maxAttempts = 300;
 
     while (attempts < maxAttempts) {
-      const statusRes = await fetch(`${baseUrl}/status`, {
+      const statusRes = await fetch(statusUrl, {
         headers: { 'Authorization': `Key ${FAL_KEY}` },
       });
       const statusData = await safeJson(statusRes);
 
       if (statusData.status === 'COMPLETED') {
-        const resultRes = await fetch(baseUrl, {
+        const resultRes = await fetch(responseUrl, {
           headers: { 'Authorization': `Key ${FAL_KEY}` },
         });
         const result = await safeJson(resultRes);
