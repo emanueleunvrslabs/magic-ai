@@ -25,7 +25,9 @@ serve(async (req) => {
       });
     }
 
-    const cleanPhone = phone.replace(/[^\d+]/g, '');
+    const cleanPhone = phone.replace(/[^\d]/g, '');
+
+    console.log('Verifying OTP for phone:', cleanPhone, 'otp:', otp);
 
     // Find valid OTP
     const { data: otpRecord, error: dbError } = await supabase
@@ -38,6 +40,8 @@ serve(async (req) => {
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
+
+    console.log('OTP lookup result:', { otpRecord, dbError });
 
     if (dbError || !otpRecord) {
       return new Response(JSON.stringify({ error: 'Invalid or expired OTP' }), {
