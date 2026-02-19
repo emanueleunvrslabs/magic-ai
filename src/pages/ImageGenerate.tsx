@@ -195,8 +195,8 @@ const ImageGenerate = () => {
                           placeholder="Describe the image you want to create..."
                           className="min-h-[80px] bg-input/50 border-border/50 rounded-xl resize-none focus:border-primary"
                         />
-                        <div className="flex flex-wrap items-end gap-4">
-                          <div className="space-y-1.5 min-w-[130px]">
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="space-y-1.5">
                             <Label className="text-foreground/70 text-xs font-medium">Aspect Ratio</Label>
                             <Select value={aspectRatio} onValueChange={setAspectRatio}>
                               <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
@@ -209,7 +209,7 @@ const ImageGenerate = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-1.5 min-w-[100px]">
+                          <div className="space-y-1.5">
                             <Label className="text-foreground/70 text-xs font-medium">Resolution</Label>
                             <Select value={resolution} onValueChange={setResolution}>
                               <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
@@ -222,7 +222,7 @@ const ImageGenerate = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-1.5 min-w-[100px]">
+                          <div className="space-y-1.5">
                             <Label className="text-foreground/70 text-xs font-medium">Format</Label>
                             <Select value={outputFormat} onValueChange={setOutputFormat}>
                               <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
@@ -235,7 +235,9 @@ const ImageGenerate = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-1.5 min-w-[140px]">
+                        </div>
+                        <div className="flex items-end gap-4">
+                          <div className="space-y-1.5 flex-1">
                             <Label className="text-foreground/70 text-xs font-medium">
                               Images: {numImages}
                             </Label>
@@ -251,7 +253,7 @@ const ImageGenerate = () => {
                           <Button
                             onClick={handleGenerate}
                             disabled={loading || !prompt.trim()}
-                            className="btn-premium rounded-xl h-9 px-6 text-sm ml-auto"
+                            className="btn-premium rounded-xl h-9 px-6 text-sm"
                           >
                             {loading ? (
                               <>
