@@ -104,8 +104,7 @@ serve(async (req) => {
     // Simplest approach: use admin.generateLink with email-based identity
     const fakeEmail = `wa_${cleanPhone.replace('+', '')}@magic-ai.app`;
     
-    // Ensure user has this email
-    await supabase.auth.admin.updateUser(userId, {
+    await supabase.auth.admin.updateUserById(userId, {
       email: fakeEmail,
       email_confirm: true,
     });
