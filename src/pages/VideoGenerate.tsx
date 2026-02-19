@@ -100,7 +100,6 @@ const MODE_CONFIG: Record<string, Record<string, ModeConfig>> = {
       durations: ["5s", "10s"],
       resolutions: [],
       defaultAspect: "16:9", defaultDuration: "5s", defaultResolution: "",
-      showCfgScale: true, showNegativePrompt: true,
     },
     "video-edit": {
       aspectRatios: [],
