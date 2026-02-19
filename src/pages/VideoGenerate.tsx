@@ -540,13 +540,7 @@ const VideoResultsArea = ({
 
   const handleShare = async (url: string) => {
     try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const file = new File([blob], `magic-ai-video-${Date.now()}.mp4`, { type: "video/mp4" });
-
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "AI Generated Video" });
-      } else if (navigator.share) {
+      if (navigator.share) {
         await navigator.share({ title: "AI Generated Video", url });
       } else {
         await navigator.clipboard.writeText(url);
