@@ -329,20 +329,20 @@ const ImageGenerate = () => {
                             className="min-h-[100px] bg-input/50 border-border/50 rounded-xl resize-none focus:border-primary"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Aspect Ratio</Label>
-                          <Select value={editAspectRatio} onValueChange={setEditAspectRatio}>
-                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {ASPECT_RATIOS.map((ar) => (
-                                <SelectItem key={ar.value} value={ar.value}>{ar.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="space-y-2">
+                            <Label className="text-foreground/90 font-medium">Aspect Ratio</Label>
+                            <Select value={editAspectRatio} onValueChange={setEditAspectRatio}>
+                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {ASPECT_RATIOS.map((ar) => (
+                                  <SelectItem key={ar.value} value={ar.value}>{ar.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                           <div className="space-y-2">
                             <Label className="text-foreground/90 font-medium">Resolution</Label>
                             <Select value={editResolution} onValueChange={setEditResolution}>
