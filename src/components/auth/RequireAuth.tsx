@@ -1,9 +1,11 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginDialog } from "@/components/auth/LoginDialog";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -18,7 +20,7 @@ export const RequireAuth = ({ children }: { children: React.ReactNode }) => {
     return (
       <>
         {children}
-        <LoginDialog open={true} onOpenChange={() => {}} />
+        <LoginDialog open={true} onOpenChange={(open) => { if (!open) navigate('/'); }} />
       </>
     );
   }
