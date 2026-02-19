@@ -499,7 +499,7 @@ const ResultsArea = ({
                   <img
                     src={img.url}
                     alt={`Generated ${i + 1}`}
-                    className="w-full h-full rounded-xl border border-border/30 shadow-md object-cover"
+                    className="w-full h-full rounded-xl object-cover"
                   />
                   {/* Overlay actions */}
                   <div className="absolute inset-0 rounded-xl bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
