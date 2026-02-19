@@ -87,7 +87,6 @@ const ImageGenerate = () => {
     if (!prompt.trim()) return;
     setLoading(true);
     setError("");
-    setResults([]);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("fal-ai-generate", {
@@ -105,7 +104,7 @@ const ImageGenerate = () => {
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
 
-      setResults(data?.images || []);
+      setResults(prev => [...prev, ...(data?.images || [])]);
     } catch (err: any) {
       setError(err.message || "Generation failed");
     } finally {
@@ -117,7 +116,6 @@ const ImageGenerate = () => {
     if (!editPrompt.trim() || editImages.length === 0) return;
     setLoading(true);
     setError("");
-    setResults([]);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke("fal-ai-generate", {
@@ -135,7 +133,7 @@ const ImageGenerate = () => {
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
 
-      setResults(data?.images || []);
+      setResults(prev => [...prev, ...(data?.images || [])]);
     } catch (err: any) {
       setError(err.message || "Edit failed");
     } finally {
@@ -475,17 +473,12 @@ const ResultsArea = ({
   return (
     <>
       <div className="min-h-[200px]">
-        {loading ? (
-          <div className="flex flex-col items-center gap-4 text-muted-foreground py-16">
-            <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            <p className="text-sm">Generating your image...</p>
-          </div>
-        ) : error ? (
+        {error && !results.length ? (
           <div className="text-center text-destructive py-16">
             <p className="font-medium">Error</p>
             <p className="text-sm mt-1 text-destructive/80">{error}</p>
           </div>
-        ) : results.length > 0 ? (
+        ) : results.length > 0 || loading ? (
           <div className="liquid-glass-card-sm p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             <AnimatePresence>
               {results.map((img, i) => (
@@ -535,6 +528,18 @@ const ResultsArea = ({
                   </div>
                 </motion.div>
               ))}
+              {loading && (
+                <motion.div
+                  key="loader"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="aspect-square rounded-xl liquid-glass flex flex-col items-center justify-center gap-3"
+                >
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-xs text-muted-foreground">Generating...</p>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
         ) : (
