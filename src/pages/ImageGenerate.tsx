@@ -441,14 +441,14 @@ const ResultsArea = ({
   error: string;
   onDownload: (url: string, i: number) => void;
 }) => (
-  <div className="liquid-glass-card-sm p-6 min-h-[400px] flex items-center justify-center">
+  <div className="min-h-[300px] flex items-center justify-center">
     {loading ? (
-      <div className="flex flex-col items-center gap-4 text-muted-foreground">
+      <div className="flex flex-col items-center gap-4 text-muted-foreground py-16">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
         <p className="text-sm">Generating your image...</p>
       </div>
     ) : error ? (
-      <div className="text-center text-destructive">
+      <div className="text-center text-destructive py-16">
         <p className="font-medium">Error</p>
         <p className="text-sm mt-1 text-destructive/80">{error}</p>
       </div>
@@ -471,7 +471,10 @@ const ResultsArea = ({
               <img
                 src={img.url}
                 alt={`Generated ${i + 1}`}
-                className="w-full rounded-xl border border-border/30 shadow-lg"
+                className={cn(
+                  "rounded-2xl border border-border/30 shadow-lg object-cover",
+                  results.length === 1 ? "max-h-[600px] w-auto mx-auto" : "w-full aspect-square"
+                )}
               />
               <button
                 onClick={() => onDownload(img.url, i)}
@@ -484,7 +487,7 @@ const ResultsArea = ({
         </AnimatePresence>
       </div>
     ) : (
-      <div className="flex flex-col items-center gap-3 text-muted-foreground">
+      <div className="flex flex-col items-center gap-3 text-muted-foreground py-16">
         <ImageIcon className="w-12 h-12 opacity-30" />
         <p className="text-sm">Your generated images will appear here</p>
       </div>
