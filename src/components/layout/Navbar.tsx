@@ -52,7 +52,7 @@ export const Navbar = () => {
         {/* Logo */}
         <a href="#" className="pr-4 pl-2">
           <span className="text-lg font-bold text-primary">
-            OK Energia
+            unvrs labs
           </span>
         </a>
         
@@ -107,7 +107,7 @@ export const Navbar = () => {
           "liquid-glass-nav"
         )}
       >
-        <span className="text-primary font-bold text-lg">OK Energia</span>
+        <span className="text-primary font-bold text-lg">unvrs labs</span>
         <motion.button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="text-foreground p-2 rounded-full liquid-glass"
