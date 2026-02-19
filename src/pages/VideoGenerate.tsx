@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/landing/Footer";
@@ -72,6 +73,7 @@ const MODE_CONFIG: Record<string, {
 };
 
 const VideoGenerate = () => {
+  const location = useLocation();
   const { videoResults, videoJobs, generateVideo } = useGeneration();
   const [activeMode, setActiveMode] = useState("text-to-video");
   const [prompt, setPrompt] = useState("");
@@ -94,6 +96,21 @@ const VideoGenerate = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileInputTarget, setFileInputTarget] = useState<string>("");
+
+  // Handle incoming image from ImageGenerate page
+  useEffect(() => {
+    const state = location.state as { imageUrl?: string } | null;
+    if (state?.imageUrl) {
+      setActiveMode("image-to-video");
+      setImageUrl({ url: state.imageUrl, preview: state.imageUrl });
+      const c = MODE_CONFIG["image-to-video"];
+      setAspectRatio(c.defaultAspect);
+      setDuration(c.defaultDuration);
+      setResolution(c.defaultResolution);
+      // Clear state so it doesn't re-trigger on re-render
+      window.history.replaceState({}, "");
+    }
+  }, [location.state]);
 
   const config = MODE_CONFIG[activeMode];
 
