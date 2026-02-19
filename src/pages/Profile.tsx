@@ -354,14 +354,19 @@ const Profile = () => {
           <div className="max-w-3xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="flex order-2 lg:order-1">
               {/* Profile Header */}
-              <div className="liquid-glass-card p-8 rounded-2xl space-y-6 flex flex-col w-full">
+              <div className="liquid-glass-card p-8 rounded-2xl space-y-6 flex flex-col w-full relative">
+                {/* Verified badge */}
+                <div className="absolute top-4 right-4 w-7 h-7 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                </div>
+
                 <div className="flex flex-col items-center text-center space-y-1">
                   <h1 className="text-2xl font-bold text-foreground">Profile</h1>
                   <p className="text-sm text-muted-foreground">Manage your account</p>
                 </div>
 
                 {/* Phone Number */}
-                <div className="liquid-glass-card-sm p-4 rounded-xl space-y-3">
+                <div className="liquid-glass-card-sm p-4 rounded-xl">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <Phone className="w-5 h-5 text-primary" />
@@ -370,10 +375,6 @@ const Profile = () => {
                       <p className="text-xs text-muted-foreground font-medium">WhatsApp Number</p>
                       <p className="text-foreground font-semibold truncate">{phone}</p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 w-fit">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
-                    <span className="text-xs font-medium text-green-500">Verified</span>
                   </div>
                 </div>
 
