@@ -4,12 +4,8 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { label: "Home", href: "#" },
-  { label: "Vantaggi", href: "#problem" },
-  { label: "Servizi", href: "#features" },
-  { label: "Come Funziona", href: "#how-it-works" },
-  { label: "Offerte", href: "#pricing" },
-  { label: "Contatti", href: "#contact" },
+  { label: "Image", href: "#image" },
+  { label: "Video", href: "#video" },
 ];
 
 export const Navbar = () => {
@@ -52,7 +48,10 @@ export const Navbar = () => {
         {/* Logo */}
         <a href="#" className="pr-4 pl-2">
           <span className="text-lg font-bold text-primary">
-            unvrs labs
+            magic ai
+          </span>
+          <span className="text-xs text-muted-foreground ml-1.5 font-medium">
+            by unvrs labs
           </span>
         </a>
         
@@ -78,8 +77,8 @@ export const Navbar = () => {
                 layoutId="activeTab"
                 className="absolute inset-0 rounded-full liquid-glass"
                 style={{
-                  background: 'linear-gradient(135deg, hsl(38 92% 50% / 0.15) 0%, hsl(38 92% 50% / 0.05) 100%)',
-                  border: '1px solid hsl(38 92% 50% / 0.25)'
+                  background: 'linear-gradient(135deg, hsl(270 80% 65% / 0.15) 0%, hsl(270 80% 65% / 0.05) 100%)',
+                  border: '1px solid hsl(270 80% 65% / 0.25)'
                 }}
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
@@ -93,10 +92,10 @@ export const Navbar = () => {
         <motion.a
           href="/login"
           className="px-5 py-2 text-sm font-semibold text-primary-foreground bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-300"
-          whileHover={{ scale: 1.05, boxShadow: '0 8px 24px hsl(38 92% 50% / 0.4)' }}
+          whileHover={{ scale: 1.05, boxShadow: '0 8px 24px hsl(270 80% 60% / 0.4)' }}
           whileTap={{ scale: 0.98 }}
         >
-          Accedi
+          Login
         </motion.a>
       </motion.div>
 
@@ -107,7 +106,10 @@ export const Navbar = () => {
           "liquid-glass-nav"
         )}
       >
-        <span className="text-primary font-bold text-lg">unvrs labs</span>
+        <div className="flex items-center gap-1">
+          <span className="text-primary font-bold text-lg">magic ai</span>
+          <span className="text-xs text-muted-foreground font-medium">by unvrs labs</span>
+        </div>
         <motion.button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="text-foreground p-2 rounded-full liquid-glass"
@@ -155,7 +157,7 @@ export const Navbar = () => {
                 transition={{ delay: 0.3 }}
                 className="px-4 py-3 rounded-xl text-base font-semibold text-center text-primary-foreground bg-gradient-to-r from-primary to-primary/80"
               >
-                Accedi
+                Login
               </motion.a>
             </div>
           </motion.div>
