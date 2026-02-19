@@ -557,7 +557,7 @@ const VideoResultsArea = ({
             <p className="text-sm mt-1 text-destructive/80">{error}</p>
           </div>
         ) : results.length > 0 || loading ? (
-          <div className="liquid-glass-card-sm p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="liquid-glass-card-sm p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <AnimatePresence>
               {loading && (
                 <motion.div
