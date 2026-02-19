@@ -21,6 +21,11 @@ const VIDEO_MODES = [
   { value: "reference-to-video", label: "Reference to Video", icon: <Play className="w-4 h-4" /> },
 ];
 
+const VIDEO_MODELS = [
+  { value: "veo-3.1-fast", label: "Veo 3.1 Fast" },
+  { value: "kling-2.5", label: "Kling 2.5" },
+];
+
 // Per-mode config
 const MODE_CONFIG: Record<string, {
   aspectRatios: string[];
@@ -76,6 +81,7 @@ const VideoGenerate = () => {
   const location = useLocation();
   const { videoResults, videoJobs, generateVideo } = useGeneration();
   const [activeMode, setActiveMode] = useState("text-to-video");
+  const [model, setModel] = useState("veo-3.1-fast");
   const [prompt, setPrompt] = useState("");
   const [negativePrompt, setNegativePrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState("16:9");
@@ -193,6 +199,7 @@ const VideoGenerate = () => {
     setError("");
 
     const body: Record<string, unknown> = {
+      model,
       mode: activeMode,
       prompt,
       aspect_ratio: aspectRatio,
@@ -251,6 +258,18 @@ const VideoGenerate = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
+              <div className="flex justify-center mb-4">
+                <Select value={model} onValueChange={setModel}>
+                  <SelectTrigger className="w-48 liquid-glass-nav border-border/50 rounded-full text-sm">
+                    <SelectValue placeholder="Model" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border z-50">
+                    {VIDEO_MODELS.map((m) => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="flex justify-center mb-8">
                 <div
                   className="liquid-glass-nav rounded-full p-1.5 flex items-center gap-1 flex-wrap justify-center"
