@@ -2,18 +2,18 @@ import { motion } from "framer-motion";
 import { Image, Video, Sparkles } from "lucide-react";
 import img1 from "@/assets/gallery/img1.jpg";
 import img2 from "@/assets/gallery/img2.jpg";
-import img3 from "@/assets/gallery/img3.jpg";
-import img4 from "@/assets/gallery/img4.jpg";
 import img5 from "@/assets/gallery/img5.jpg";
-import img6 from "@/assets/gallery/img6.jpg";
+import vid1 from "@/assets/gallery/vid1.mp4";
+import vid2 from "@/assets/gallery/vid2.mp4";
+import vid3 from "@/assets/gallery/vid3.mp4";
 
 const galleryItems = [
   { src: img1, label: "Nano Banana Pro", type: "image" as const, span: "row-span-1" },
   { src: img2, label: "Nano Banana Pro", type: "image" as const, span: "row-span-2" },
-  { src: img3, label: "Veo 3.1", type: "video" as const, span: "row-span-1" },
-  { src: img4, label: "Kling", type: "video" as const, span: "row-span-1" },
+  { src: vid1, label: "Veo 3.1", type: "video" as const, span: "row-span-1" },
+  { src: vid2, label: "Kling", type: "video" as const, span: "row-span-1" },
   { src: img5, label: "Nano Banana Pro", type: "image" as const, span: "row-span-2" },
-  { src: img6, label: "Veo 3.1", type: "video" as const, span: "row-span-1" },
+  { src: vid3, label: "Veo 3.1", type: "video" as const, span: "row-span-1" },
 ];
 
 export const HeroGallery = () => {
@@ -58,11 +58,22 @@ export const HeroGallery = () => {
               transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
               className={`relative group rounded-2xl overflow-hidden cursor-pointer ${item.span}`}
             >
-              <img
-                src={item.src}
-                alt={`AI generated ${item.type}`}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
+              {item.type === "video" ? (
+                <video
+                  src={item.src}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              ) : (
+                <img
+                  src={item.src}
+                  alt={`AI generated ${item.type}`}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              )}
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               {/* Badge */}
