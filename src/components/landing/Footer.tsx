@@ -11,7 +11,7 @@ export const Footer = () => {
               rel="noopener noreferrer"
               className="text-foreground hover:text-primary transition-colors font-medium"
             >
-              unvrs labs
+              magic ai by unvrs labs
             </a>
           </p>
         </div>
