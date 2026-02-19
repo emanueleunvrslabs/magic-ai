@@ -204,7 +204,7 @@ export const Navbar = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:hidden fixed top-[5rem] left-4 right-4 z-50 rounded-[1.5rem] overflow-hidden liquid-glass-card"
+              className="lg:hidden fixed top-[6rem] left-4 right-4 z-50 rounded-[1.5rem] overflow-hidden liquid-glass-card"
             >
               <div className="flex flex-col p-4 gap-1">
                 {visibleLinks.map((link, index) => (
