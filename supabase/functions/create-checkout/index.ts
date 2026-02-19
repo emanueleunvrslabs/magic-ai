@@ -28,17 +28,28 @@ serve(async (req) => {
   );
 
   try {
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    console.log("Auth header present:", !!authHeader);
+    if (!authHeader) throw new Error("Not authenticated – no authorization header");
     const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
+    const { data, error: authError } = await supabaseClient.auth.getUser(token);
+    if (authError) {
+      console.error("Auth error:", authError.message);
+      throw new Error("Auth error: " + authError.message);
+    }
     const user = data.user;
     if (!user) throw new Error("Not authenticated");
 
     const { package: pkg } = await req.json();
+    console.log("Package requested:", pkg);
     const selected = CREDIT_PACKAGES[pkg];
-    if (!selected) throw new Error("Invalid package");
+    if (!selected) throw new Error("Invalid package: " + pkg);
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY not configured");
+    if (stripeKey.startsWith("pk_")) throw new Error("Invalid key: using publishable key instead of secret key");
+    console.log("Stripe key mode:", stripeKey.startsWith("sk_test_") ? "test" : "live");
+    const stripe = new Stripe(stripeKey, {
       apiVersion: "2025-08-27.basil",
     });
 
@@ -54,6 +65,7 @@ serve(async (req) => {
       if (customers.data.length > 0) customerId = customers.data[0].id;
     }
 
+    console.log("Creating checkout session for user:", user.id, "email:", email, "customerId:", customerId);
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : email,
@@ -67,11 +79,13 @@ serve(async (req) => {
       },
     });
 
+    console.log("Checkout session created:", session.id, "url:", session.url);
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
+    console.error("Checkout error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
