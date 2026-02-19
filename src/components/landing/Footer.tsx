@@ -5,13 +5,14 @@ export const Footer = () => {
         <div className="border-t border-white/10 pt-8 flex items-center justify-center">
           <p className="text-muted-foreground text-sm">
             © {new Date().getFullYear()}{" "}
+            Magic Ai by{" "}
             <a
               href="https://www.unvrslabs.dev"
               target="_blank"
               rel="noopener noreferrer"
               className="text-foreground hover:text-primary transition-colors font-medium"
             >
-              Magic Ai
+              Unvrs Labs
             </a>
           </p>
         </div>
