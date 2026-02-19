@@ -13,6 +13,9 @@ import { Loader2, Video, Upload, X, Film, ImageIcon, Layers, Play, ArrowRight, D
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useGeneration } from "@/contexts/GenerationContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { LoginDialog } from "@/components/auth/LoginDialog";
+import { NoCreditsDialog } from "@/components/credits/NoCreditsDialog";
 
 const VIDEO_MODES_BY_MODEL: Record<string, Array<{ value: string; label: string; icon: JSX.Element }>> = {
   "veo-3.1-fast": [
@@ -111,10 +114,13 @@ const MODE_CONFIG: Record<string, Record<string, ModeConfig>> = {
 
 const VideoGenerate = () => {
   const location = useLocation();
-  const { videoResults, videoJobs, generateVideo, deleteMedia } = useGeneration();
+  const { user } = useAuth();
+  const { videoResults, videoJobs, generateVideo, deleteMedia, checkCanGenerate } = useGeneration();
   const [activeMode, setActiveMode] = useState("text-to-video");
   const [model, setModel] = useState("veo-3.1-fast");
   const [prompt, setPrompt] = useState("");
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [noCreditsOpen, setNoCreditsOpen] = useState(false);
   const [cfgScale, setCfgScale] = useState(0.5);
   const [negativePrompt, setNegativePrompt] = useState("");
   const [keepAudio, setKeepAudio] = useState(true);
@@ -248,8 +254,11 @@ const VideoGenerate = () => {
     }
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!canGenerate()) return;
+    if (!user) { setLoginOpen(true); return; }
+    const ok = await checkCanGenerate();
+    if (!ok) { setNoCreditsOpen(true); return; }
     setError("");
 
     const body: Record<string, unknown> = {
@@ -647,6 +656,9 @@ const VideoGenerate = () => {
 
         <Footer />
       </div>
+
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      <NoCreditsDialog open={noCreditsOpen} onOpenChange={setNoCreditsOpen} />
     </div>
   );
 };
