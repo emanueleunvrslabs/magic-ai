@@ -517,31 +517,41 @@ const VideoResultsArea = ({
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const handleDirectDownload = async (url: string, index: number) => {
+  const handleSaveToGallery = async (url: string, index: number) => {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = `magic-ai-video-${Date.now()}-${index}.mp4`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-    } catch {
-      window.open(url, "_blank");
-    }
+      const file = new File([blob], `magic-ai-video-${Date.now()}-${index}.mp4`, { type: "video/mp4" });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+      } else {
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }
+    } catch { /* user cancelled or error */ }
   };
 
   const handleShare = async (url: string) => {
-    if (navigator.share) {
-      try {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const file = new File([blob], `magic-ai-video-${Date.now()}.mp4`, { type: "video/mp4" });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "AI Generated Video" });
+      } else if (navigator.share) {
         await navigator.share({ title: "AI Generated Video", url });
-      } catch { /* user cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(url);
-    }
+      } else {
+        await navigator.clipboard.writeText(url);
+      }
+    } catch { /* user cancelled */ }
   };
 
   return (
@@ -585,7 +595,7 @@ const VideoResultsArea = ({
                   {/* Action bar */}
                   <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={() => handleDirectDownload(vid.url, i)}
+                      onClick={() => handleSaveToGallery(vid.url, i)}
                       className="p-1.5 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
                       title="Download"
                     >

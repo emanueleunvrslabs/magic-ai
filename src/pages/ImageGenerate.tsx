@@ -417,32 +417,45 @@ const ResultsArea = ({
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const handleDirectDownload = async (url: string, index: number) => {
+  const handleSaveToGallery = async (url: string, index: number) => {
     try {
       const response = await fetch(url);
       const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = `magic-ai-${Date.now()}-${index}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
+      const ext = blob.type.includes("png") ? "png" : blob.type.includes("webp") ? "webp" : "jpg";
+      const file = new File([blob], `magic-ai-${Date.now()}-${index}.${ext}`, { type: blob.type });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+      } else {
+        // Fallback: regular download
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      }
     } catch {
-      // Fallback
-      onDownload(url, index);
+      // user cancelled or error
     }
   };
 
   const handleShare = async (url: string) => {
-    if (navigator.share) {
-      try {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const file = new File([blob], `magic-ai-${Date.now()}.jpg`, { type: blob.type });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: "AI Generated Image" });
+      } else if (navigator.share) {
         await navigator.share({ title: "AI Generated Image", url });
-      } catch { /* user cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(url);
-    }
+      } else {
+        await navigator.clipboard.writeText(url);
+      }
+    } catch { /* user cancelled */ }
   };
 
   return (
@@ -485,7 +498,7 @@ const ResultsArea = ({
                   <div className="absolute inset-0 rounded-xl bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handleDirectDownload(img.url, i)}
+                        onClick={() => handleSaveToGallery(img.url, i)}
                         className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
                         title="Download"
                       >
