@@ -536,7 +536,7 @@ const VideoGenerate = () => {
                     {/* Controls row */}
                     <div className="flex flex-wrap items-end gap-4">
                       {config?.aspectRatios?.length > 0 && (
-                        <div className="space-y-1.5 min-w-[120px]">
+                        <div className="space-y-1.5 flex-1 min-w-[80px]">
                           <Label className="text-foreground/70 text-xs font-medium">Aspect Ratio</Label>
                           <Select value={aspectRatio} onValueChange={setAspectRatio}>
                             <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
@@ -552,7 +552,7 @@ const VideoGenerate = () => {
                       )}
 
                       {config?.durations?.length > 0 && (
-                        <div className="space-y-1.5 min-w-[100px]">
+                        <div className="space-y-1.5 flex-1 min-w-[70px]">
                           <Label className="text-foreground/70 text-xs font-medium">Duration</Label>
                           <Select value={duration} onValueChange={setDuration}>
                             <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
@@ -568,7 +568,7 @@ const VideoGenerate = () => {
                       )}
 
                       {config?.showResolution && config?.resolutions?.length > 0 && (
-                        <div className="space-y-1.5 min-w-[100px]">
+                        <div className="space-y-1.5 flex-1 min-w-[70px]">
                           <Label className="text-foreground/70 text-xs font-medium">Resolution</Label>
                           <Select value={resolution} onValueChange={setResolution}>
                             <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
