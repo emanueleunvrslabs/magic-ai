@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/landing/Footer";
@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Video, Upload, X, Film, ImageIcon, Layers, Play, ArrowRight, Download, Share2, Expand } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const VIDEO_MODES = [
   { value: "text-to-video", label: "Text to Video", icon: <Film className="w-4 h-4" /> },
@@ -72,6 +73,7 @@ const MODE_CONFIG: Record<string, {
 };
 
 const VideoGenerate = () => {
+  const { user } = useAuth();
   const [activeMode, setActiveMode] = useState("text-to-video");
   const [prompt, setPrompt] = useState("");
   const [negativePrompt, setNegativePrompt] = useState("");
@@ -91,6 +93,32 @@ const VideoGenerate = () => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Array<{ url: string }>>([]);
   const [error, setError] = useState("");
+
+  // Load saved videos on mount
+  useEffect(() => {
+    if (!user) return;
+    const loadSaved = async () => {
+      const { data } = await supabase
+        .from("generated_media")
+        .select("url")
+        .eq("user_id", user.id)
+        .eq("media_type", "video")
+        .order("created_at", { ascending: false });
+      if (data?.length) {
+        setResults(data.map((r) => ({ url: r.url })));
+      }
+    };
+    loadSaved();
+  }, [user]);
+
+  const saveMedia = async (url: string) => {
+    if (!user) return;
+    await supabase.from("generated_media").insert({
+      user_id: user.id,
+      media_type: "video",
+      url,
+    });
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileInputTarget, setFileInputTarget] = useState<string>("");
@@ -211,6 +239,7 @@ const VideoGenerate = () => {
 
       if (data?.video?.url) {
         setResults((prev) => [{ url: data.video.url }, ...prev]);
+        await saveMedia(data.video.url);
       }
     } catch (err: any) {
       setError(err.message || "Video generation failed");
