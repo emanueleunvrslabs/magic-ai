@@ -21,6 +21,7 @@ export const Navbar = () => {
   const [loginOpen, setLoginOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
+  const [hasOwnKey, setHasOwnKey] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const activeLink = location.pathname;
@@ -38,12 +39,12 @@ export const Navbar = () => {
   useEffect(() => {
     if (!user) { setBalance(null); return; }
     const load = async () => {
-      const { data } = await supabase
-        .from("user_credits")
-        .select("balance")
-        .eq("user_id", user.id)
-        .single();
-      setBalance(data?.balance ?? 0);
+      const [creditsRes, keysRes] = await Promise.all([
+        supabase.from("user_credits").select("balance").eq("user_id", user.id).single(),
+        supabase.from("user_api_keys").select("provider, is_valid").eq("user_id", user.id).eq("provider", "fal").eq("is_valid", true),
+      ]);
+      setBalance(creditsRes.data?.balance ?? 0);
+      setHasOwnKey((keysRes.data?.length ?? 0) > 0);
     };
     load();
 
@@ -155,7 +156,7 @@ export const Navbar = () => {
             {user ? (
               <>
                 <Wallet className="w-4 h-4" />
-                €{balance !== null ? balance.toFixed(2) : "—"}
+                {hasOwnKey ? "∞" : `€${balance !== null ? balance.toFixed(2) : "—"}`}
               </>
             ) : (
               "Login"
@@ -182,7 +183,7 @@ export const Navbar = () => {
                 whileTap={{ scale: 0.95 }}
               >
                 <Wallet className="w-3.5 h-3.5 text-primary" />
-                €{balance !== null ? balance.toFixed(2) : "—"}
+                {hasOwnKey ? "∞" : `€${balance !== null ? balance.toFixed(2) : "—"}`}
               </motion.button>
             )}
             <motion.button

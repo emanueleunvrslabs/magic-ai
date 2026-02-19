@@ -21,17 +21,18 @@ interface CreditsDialogProps {
 
 export const CreditsDialog = ({ open, onOpenChange, userId }: CreditsDialogProps) => {
   const [balance, setBalance] = useState<number | null>(null);
+  const [hasOwnKey, setHasOwnKey] = useState(false);
   const [purchasing, setPurchasing] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !userId) return;
     const load = async () => {
-      const { data } = await supabase
-        .from("user_credits")
-        .select("balance")
-        .eq("user_id", userId)
-        .single();
-      setBalance(data?.balance ?? 0);
+      const [creditsRes, keysRes] = await Promise.all([
+        supabase.from("user_credits").select("balance").eq("user_id", userId).single(),
+        supabase.from("user_api_keys").select("provider, is_valid").eq("user_id", userId).eq("provider", "fal").eq("is_valid", true),
+      ]);
+      setBalance(creditsRes.data?.balance ?? 0);
+      setHasOwnKey((keysRes.data?.length ?? 0) > 0);
     };
     load();
   }, [open, userId]);
@@ -75,7 +76,7 @@ export const CreditsDialog = ({ open, onOpenChange, userId }: CreditsDialogProps
                 <div>
                   <p className="text-xs text-muted-foreground font-medium">Saldo disponibile</p>
                   <p className="text-2xl font-bold text-foreground">
-                    €{balance !== null ? balance.toFixed(2) : "—"}
+                    {hasOwnKey ? "∞" : `€${balance !== null ? balance.toFixed(2) : "—"}`}
                   </p>
                 </div>
               </div>
