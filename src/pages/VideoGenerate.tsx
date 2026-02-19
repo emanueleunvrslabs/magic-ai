@@ -577,8 +577,7 @@ const VideoResultsArea = ({
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
-                  className="relative group aspect-video cursor-pointer"
-                  onClick={() => setPreviewUrl(vid.url)}
+                  className="relative group aspect-video"
                 >
                   <video
                     src={vid.url}
@@ -587,35 +586,38 @@ const VideoResultsArea = ({
                     loop
                     playsInline
                   />
-                  {/* Play overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="p-3 rounded-full liquid-glass">
-                      <Play className="w-6 h-6 text-foreground" />
+                  {/* Overlay actions */}
+                  <div className="absolute inset-0 rounded-xl bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPreviewUrl(vid.url)}
+                        className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                        title="Play"
+                      >
+                        <Play className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleSaveToGallery(vid.url, i)}
+                        className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                        title="Download"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleShare(vid.url)}
+                        className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                        title="Share"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setPreviewUrl(vid.url)}
+                        className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                        title="Fullscreen"
+                      >
+                        <Expand className="w-4 h-4" />
+                      </button>
                     </div>
-                  </div>
-                  {/* Action bar */}
-                  <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => handleSaveToGallery(vid.url, i)}
-                      className="p-1.5 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
-                      title="Download"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleShare(vid.url)}
-                      className="p-1.5 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
-                      title="Share"
-                    >
-                      <Share2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => setPreviewUrl(vid.url)}
-                      className="p-1.5 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
-                      title="Fullscreen"
-                    >
-                      <Expand className="w-3.5 h-3.5" />
-                    </button>
                   </div>
                 </motion.div>
               ))}
