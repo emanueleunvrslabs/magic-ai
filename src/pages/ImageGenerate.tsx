@@ -248,7 +248,7 @@ const ImageGenerate = () => {
                             </Select>
                           </div>
                         </div>
-                        <div className="flex items-end gap-4">
+                        <div className="flex items-end justify-between gap-4">
                           <div className="space-y-1.5">
                             <Label className="text-foreground/70 text-xs font-medium">Images</Label>
                             <div className="flex gap-1.5">
