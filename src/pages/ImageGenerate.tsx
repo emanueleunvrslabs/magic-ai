@@ -383,25 +383,23 @@ const ImageGenerate = () => {
                             </Select>
                           </div>
                         </div>
-                        <div className="flex justify-end">
-                          <Button
-                            onClick={handleEdit}
-                            disabled={loading || !editPrompt.trim() || editImages.length === 0}
-                            className="btn-premium rounded-xl h-9 px-6 text-sm"
-                          >
-                            {loading ? (
-                              <>
-                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                Editing...
-                              </>
-                            ) : (
-                              <>
-                                <Wand2 className="w-4 h-4 mr-2" />
-                                Edit Image
-                              </>
-                            )}
-                          </Button>
-                        </div>
+                        <Button
+                          onClick={handleEdit}
+                          disabled={loading || !editPrompt.trim() || editImages.length === 0}
+                          className="w-full btn-premium rounded-xl h-12 text-base"
+                        >
+                          {loading ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                              Editing...
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 className="w-5 h-5 mr-2" />
+                              Edit Image
+                            </>
+                          )}
+                        </Button>
                       </div>
                     </div>
 
