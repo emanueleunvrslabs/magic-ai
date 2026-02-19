@@ -5,12 +5,20 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const MODE_ENDPOINTS: Record<string, string> = {
+// Veo 3.1 Fast endpoints
+const VEO_ENDPOINTS: Record<string, string> = {
   'text-to-video': 'fal-ai/veo3.1/fast',
   'extend-video': 'fal-ai/veo3.1/fast/extend-video',
   'first-last-frame': 'fal-ai/veo3.1/fast/first-last-frame-to-video',
   'image-to-video': 'fal-ai/veo3.1/fast/image-to-video',
   'reference-to-video': 'fal-ai/veo3.1/reference-to-video',
+};
+
+// Kling 2.5 endpoints
+const KLING_ENDPOINTS: Record<string, string> = {
+  'text-to-video': 'fal-ai/kling-video/v2.5-turbo/pro/text-to-video',
+  'image-to-video': 'fal-ai/kling-video/v2.5-turbo/pro/image-to-video',
+  'video-edit': 'fal-ai/kling-video/o3/standard/video-to-video/edit',
 };
 
 async function safeJson(res: Response): Promise<any> {
@@ -38,18 +46,26 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { mode, ...params } = body;
+    const { model = 'veo-3.1-fast', mode, ...params } = body;
 
-    const endpointId = MODE_ENDPOINTS[mode];
+    // Select endpoint based on model
+    const endpoints = model === 'kling-2.5' ? KLING_ENDPOINTS : VEO_ENDPOINTS;
+    const endpointId = endpoints[mode];
     if (!endpointId) {
-      return new Response(JSON.stringify({ error: `Invalid mode: ${mode}. Valid modes: ${Object.keys(MODE_ENDPOINTS).join(', ')}` }), {
+      return new Response(JSON.stringify({ error: `Invalid mode "${mode}" for model "${model}". Valid modes: ${Object.keys(endpoints).join(', ')}` }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    // Clean params: remove model-specific fields that don't belong
+    // Strip the "s" suffix from duration for Kling (expects "5" not "5s")
+    if (model === 'kling-2.5' && params.duration) {
+      params.duration = params.duration.replace('s', '');
+    }
+
     const queueUrl = `https://queue.fal.run/${endpointId}`;
-    console.log('Submitting to:', queueUrl, 'mode:', mode, 'params:', JSON.stringify(params));
+    console.log('Submitting to:', queueUrl, 'model:', model, 'mode:', mode, 'params:', JSON.stringify(params));
 
     // Submit to queue
     const submitRes = await fetch(queueUrl, {

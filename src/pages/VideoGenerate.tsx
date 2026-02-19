@@ -8,72 +8,105 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Video, Upload, X, Film, ImageIcon, Layers, Play, ArrowRight, Download, Share2, Expand, Trash2 } from "lucide-react";
+import { Loader2, Video, Upload, X, Film, ImageIcon, Layers, Play, ArrowRight, Download, Share2, Expand, Trash2, Scissors } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useGeneration } from "@/contexts/GenerationContext";
 
-const VIDEO_MODES = [
-  { value: "text-to-video", label: "Text to Video", icon: <Film className="w-4 h-4" /> },
-  { value: "image-to-video", label: "Image to Video", icon: <ImageIcon className="w-4 h-4" /> },
-  { value: "first-last-frame", label: "First/Last Frame", icon: <Layers className="w-4 h-4" /> },
-  { value: "extend-video", label: "Extend Video", icon: <ArrowRight className="w-4 h-4" /> },
-  { value: "reference-to-video", label: "Reference to Video", icon: <Play className="w-4 h-4" /> },
-];
+const VIDEO_MODES_BY_MODEL: Record<string, Array<{ value: string; label: string; icon: JSX.Element }>> = {
+  "veo-3.1-fast": [
+    { value: "text-to-video", label: "Text to Video", icon: <Film className="w-4 h-4" /> },
+    { value: "image-to-video", label: "Image to Video", icon: <ImageIcon className="w-4 h-4" /> },
+    { value: "first-last-frame", label: "First/Last Frame", icon: <Layers className="w-4 h-4" /> },
+    { value: "extend-video", label: "Extend Video", icon: <ArrowRight className="w-4 h-4" /> },
+    { value: "reference-to-video", label: "Reference to Video", icon: <Play className="w-4 h-4" /> },
+  ],
+  "kling-2.5": [
+    { value: "text-to-video", label: "Text to Video", icon: <Film className="w-4 h-4" /> },
+    { value: "image-to-video", label: "Image to Video", icon: <ImageIcon className="w-4 h-4" /> },
+    { value: "video-edit", label: "Video Edit", icon: <Scissors className="w-4 h-4" /> },
+  ],
+};
 
 const VIDEO_MODELS = [
   { value: "veo-3.1-fast", label: "Veo 3.1 Fast" },
   { value: "kling-2.5", label: "Kling 2.5" },
 ];
 
-// Per-mode config
-const MODE_CONFIG: Record<string, {
+interface ModeConfig {
   aspectRatios: string[];
   durations: string[];
   resolutions: string[];
   defaultAspect: string;
   defaultDuration: string;
   defaultResolution: string;
-}> = {
-  "text-to-video": {
-    aspectRatios: ["16:9", "9:16"],
-    durations: ["4s", "6s", "8s"],
-    resolutions: ["720p", "1080p", "4k"],
-    defaultAspect: "16:9",
-    defaultDuration: "8s",
-    defaultResolution: "720p",
+  showResolution?: boolean;
+  showAudio?: boolean;
+  showAutoFix?: boolean;
+  showCfgScale?: boolean;
+  showNegativePrompt?: boolean;
+}
+
+// Per-model, per-mode config
+const MODE_CONFIG: Record<string, Record<string, ModeConfig>> = {
+  "veo-3.1-fast": {
+    "text-to-video": {
+      aspectRatios: ["16:9", "9:16"],
+      durations: ["4s", "6s", "8s"],
+      resolutions: ["720p", "1080p", "4k"],
+      defaultAspect: "16:9", defaultDuration: "8s", defaultResolution: "720p",
+      showResolution: true, showAudio: true, showAutoFix: true,
+    },
+    "image-to-video": {
+      aspectRatios: ["auto", "16:9", "9:16"],
+      durations: ["4s", "6s", "8s"],
+      resolutions: ["720p", "1080p", "4k"],
+      defaultAspect: "auto", defaultDuration: "8s", defaultResolution: "720p",
+      showResolution: true, showAudio: true, showAutoFix: true,
+    },
+    "first-last-frame": {
+      aspectRatios: ["auto", "16:9", "9:16"],
+      durations: ["4s", "6s", "8s"],
+      resolutions: ["720p", "1080p", "4k"],
+      defaultAspect: "auto", defaultDuration: "8s", defaultResolution: "720p",
+      showResolution: true, showAudio: true, showAutoFix: true,
+    },
+    "extend-video": {
+      aspectRatios: ["auto", "16:9", "9:16"],
+      durations: ["7s"],
+      resolutions: ["720p"],
+      defaultAspect: "auto", defaultDuration: "7s", defaultResolution: "720p",
+      showResolution: false, showAudio: true, showAutoFix: true,
+    },
+    "reference-to-video": {
+      aspectRatios: ["16:9", "9:16"],
+      durations: ["8s"],
+      resolutions: ["720p", "1080p", "4k"],
+      defaultAspect: "16:9", defaultDuration: "8s", defaultResolution: "720p",
+      showResolution: true, showAudio: true, showAutoFix: true,
+    },
   },
-  "image-to-video": {
-    aspectRatios: ["auto", "16:9", "9:16"],
-    durations: ["4s", "6s", "8s"],
-    resolutions: ["720p", "1080p", "4k"],
-    defaultAspect: "auto",
-    defaultDuration: "8s",
-    defaultResolution: "720p",
-  },
-  "first-last-frame": {
-    aspectRatios: ["auto", "16:9", "9:16"],
-    durations: ["4s", "6s", "8s"],
-    resolutions: ["720p", "1080p", "4k"],
-    defaultAspect: "auto",
-    defaultDuration: "8s",
-    defaultResolution: "720p",
-  },
-  "extend-video": {
-    aspectRatios: ["auto", "16:9", "9:16"],
-    durations: ["7s"],
-    resolutions: ["720p"],
-    defaultAspect: "auto",
-    defaultDuration: "7s",
-    defaultResolution: "720p",
-  },
-  "reference-to-video": {
-    aspectRatios: ["16:9", "9:16"],
-    durations: ["8s"],
-    resolutions: ["720p", "1080p", "4k"],
-    defaultAspect: "16:9",
-    defaultDuration: "8s",
-    defaultResolution: "720p",
+  "kling-2.5": {
+    "text-to-video": {
+      aspectRatios: ["16:9", "9:16", "1:1"],
+      durations: ["5s", "10s"],
+      resolutions: [],
+      defaultAspect: "16:9", defaultDuration: "5s", defaultResolution: "",
+      showCfgScale: true, showNegativePrompt: true,
+    },
+    "image-to-video": {
+      aspectRatios: ["16:9", "9:16", "1:1"],
+      durations: ["5s", "10s"],
+      resolutions: [],
+      defaultAspect: "16:9", defaultDuration: "5s", defaultResolution: "",
+      showCfgScale: true, showNegativePrompt: true,
+    },
+    "video-edit": {
+      aspectRatios: [],
+      durations: [],
+      resolutions: [],
+      defaultAspect: "", defaultDuration: "", defaultResolution: "",
+    },
   },
 };
 
@@ -83,7 +116,9 @@ const VideoGenerate = () => {
   const [activeMode, setActiveMode] = useState("text-to-video");
   const [model, setModel] = useState("veo-3.1-fast");
   const [prompt, setPrompt] = useState("");
+  const [cfgScale, setCfgScale] = useState(0.5);
   const [negativePrompt, setNegativePrompt] = useState("");
+  const [keepAudio, setKeepAudio] = useState(true);
   const [aspectRatio, setAspectRatio] = useState("16:9");
   const [duration, setDuration] = useState("8s");
   const [resolution, setResolution] = useState("720p");
@@ -113,23 +148,41 @@ const VideoGenerate = () => {
       // Also pre-fill first frame and reference images
       setFirstFrameUrl(item);
       setReferenceImages([item]);
-      const c = MODE_CONFIG["image-to-video"];
-      setAspectRatio(c.defaultAspect);
-      setDuration(c.defaultDuration);
-      setResolution(c.defaultResolution);
+      const c = MODE_CONFIG[model]?.["image-to-video"];
+      if (c) {
+        setAspectRatio(c.defaultAspect);
+        setDuration(c.defaultDuration);
+        setResolution(c.defaultResolution);
+      }
       // Clear state so it doesn't re-trigger on re-render
       window.history.replaceState({}, "");
     }
   }, [location.state]);
 
-  const config = MODE_CONFIG[activeMode];
+  const config = MODE_CONFIG[model]?.[activeMode];
+  const availableModes = VIDEO_MODES_BY_MODEL[model] || [];
+
+  const handleModelChange = (newModel: string) => {
+    setModel(newModel);
+    const modes = VIDEO_MODES_BY_MODEL[newModel] || [];
+    const firstMode = modes[0]?.value || "text-to-video";
+    setActiveMode(firstMode);
+    const c = MODE_CONFIG[newModel]?.[firstMode];
+    if (c) {
+      setAspectRatio(c.defaultAspect);
+      setDuration(c.defaultDuration);
+      setResolution(c.defaultResolution);
+    }
+  };
 
   const handleModeChange = (mode: string) => {
     setActiveMode(mode);
-    const c = MODE_CONFIG[mode];
-    setAspectRatio(c.defaultAspect);
-    setDuration(c.defaultDuration);
-    setResolution(c.defaultResolution);
+    const c = MODE_CONFIG[model]?.[mode];
+    if (c) {
+      setAspectRatio(c.defaultAspect);
+      setDuration(c.defaultDuration);
+      setResolution(c.defaultResolution);
+    }
   };
 
   const handleFileSelect = (target: string) => {
@@ -189,6 +242,8 @@ const VideoGenerate = () => {
         return !!videoUrl;
       case "reference-to-video":
         return referenceImages.length > 0;
+      case "video-edit":
+        return !!videoUrl;
       default:
         return true;
     }
@@ -202,15 +257,20 @@ const VideoGenerate = () => {
       model,
       mode: activeMode,
       prompt,
-      aspect_ratio: aspectRatio,
-      duration,
-      resolution,
-      generate_audio: generateAudio,
-      auto_fix: autoFix,
     };
 
-    if (negativePrompt.trim()) {
-      body.negative_prompt = negativePrompt;
+    // Add params based on what the config supports
+    if (config?.aspectRatios?.length) body.aspect_ratio = aspectRatio;
+    if (config?.durations?.length) body.duration = duration;
+    if (config?.resolutions?.length && config.showResolution) body.resolution = resolution;
+    if (config?.showAudio) body.generate_audio = generateAudio;
+    if (config?.showAutoFix) body.auto_fix = autoFix;
+    if (config?.showCfgScale) body.cfg_scale = cfgScale;
+    if (config?.showNegativePrompt && negativePrompt.trim()) body.negative_prompt = negativePrompt;
+
+    // Kling video-edit specific
+    if (activeMode === "video-edit") {
+      body.keep_audio = keepAudio;
     }
 
     switch (activeMode) {
@@ -226,6 +286,9 @@ const VideoGenerate = () => {
         break;
       case "reference-to-video":
         body.image_urls = referenceImages.map((img) => img.url);
+        break;
+      case "video-edit":
+        body.video_url = videoUrl!.url;
         break;
     }
 
@@ -265,7 +328,7 @@ const VideoGenerate = () => {
                     boxShadow: '0 4px 24px hsl(0 0% 0% / 0.15), inset 0 1px 0 0 hsl(0 0% 100% / 0.08)',
                   }}
                 >
-                  <Select value={model} onValueChange={setModel}>
+                  <Select value={model} onValueChange={handleModelChange}>
                     <SelectTrigger className="px-4 py-2 text-sm font-medium rounded-full liquid-glass border-none min-w-[140px]">
                       <SelectValue />
                     </SelectTrigger>
@@ -276,7 +339,7 @@ const VideoGenerate = () => {
                     </SelectContent>
                   </Select>
                   <div className="w-px h-6 bg-border/30" />
-                  {VIDEO_MODES.map((mode) => (
+                  {availableModes.map((mode) => (
                     <motion.button
                       key={mode.value}
                       onClick={() => handleModeChange(mode.value)}
@@ -429,6 +492,32 @@ const VideoGenerate = () => {
                           </div>
                         </motion.div>
                       )}
+
+                      {activeMode === "video-edit" && (
+                        <motion.div key="ve-upload" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+                          <Label className="text-foreground/70 text-xs font-medium mb-2 block">Source Video</Label>
+                          <div className="flex items-center gap-3">
+                            {videoUrl ? (
+                              <div className="relative group">
+                                <div className="h-20 w-32 rounded-xl bg-muted flex items-center justify-center">
+                                  <Video className="w-6 h-6 text-muted-foreground" />
+                                </div>
+                                <button onClick={() => setVideoUrl(null)} className="absolute -top-1 -right-1 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleFileSelect("extend-video")}
+                                className="h-20 w-32 rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-1 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                              >
+                                <Upload className="w-4 h-4" />
+                                <span className="text-[10px]">Upload video</span>
+                              </button>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
                     </AnimatePresence>
 
                     {/* Prompt */}
@@ -441,57 +530,74 @@ const VideoGenerate = () => {
 
                     {/* Controls row */}
                     <div className="flex flex-wrap items-end gap-4">
-                      <div className="space-y-1.5 min-w-[120px]">
-                        <Label className="text-foreground/70 text-xs font-medium">Aspect Ratio</Label>
-                        <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                          <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {config.aspectRatios.map((ar) => (
-                              <SelectItem key={ar} value={ar}>{ar}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {config?.aspectRatios?.length > 0 && (
+                        <div className="space-y-1.5 min-w-[120px]">
+                          <Label className="text-foreground/70 text-xs font-medium">Aspect Ratio</Label>
+                          <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {config.aspectRatios.map((ar) => (
+                                <SelectItem key={ar} value={ar}>{ar}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
 
-                      <div className="space-y-1.5 min-w-[100px]">
-                        <Label className="text-foreground/70 text-xs font-medium">Duration</Label>
-                        <Select value={duration} onValueChange={setDuration}>
-                          <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {config.durations.map((d) => (
-                              <SelectItem key={d} value={d}>{d}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {config?.durations?.length > 0 && (
+                        <div className="space-y-1.5 min-w-[100px]">
+                          <Label className="text-foreground/70 text-xs font-medium">Duration</Label>
+                          <Select value={duration} onValueChange={setDuration}>
+                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {config.durations.map((d) => (
+                                <SelectItem key={d} value={d}>{d}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
 
-                      <div className="space-y-1.5 min-w-[100px]">
-                        <Label className="text-foreground/70 text-xs font-medium">Resolution</Label>
-                        <Select value={resolution} onValueChange={setResolution}>
-                          <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {config.resolutions.map((r) => (
-                              <SelectItem key={r} value={r}>{r}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {config?.showResolution && config?.resolutions?.length > 0 && (
+                        <div className="space-y-1.5 min-w-[100px]">
+                          <Label className="text-foreground/70 text-xs font-medium">Resolution</Label>
+                          <Select value={resolution} onValueChange={setResolution}>
+                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {config.resolutions.map((r) => (
+                                <SelectItem key={r} value={r}>{r}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
 
-                      <div className="flex items-center gap-2">
-                        <Switch checked={generateAudio} onCheckedChange={setGenerateAudio} id="audio" />
-                        <Label htmlFor="audio" className="text-foreground/70 text-xs font-medium cursor-pointer">Audio</Label>
-                      </div>
+                      {config?.showAudio && (
+                        <div className="flex items-center gap-2">
+                          <Switch checked={generateAudio} onCheckedChange={setGenerateAudio} id="audio" />
+                          <Label htmlFor="audio" className="text-foreground/70 text-xs font-medium cursor-pointer">Audio</Label>
+                        </div>
+                      )}
 
-                      <div className="flex items-center gap-2">
-                        <Switch checked={autoFix} onCheckedChange={setAutoFix} id="autofix" />
-                        <Label htmlFor="autofix" className="text-foreground/70 text-xs font-medium cursor-pointer">Auto Fix</Label>
-                      </div>
+                      {config?.showAutoFix && (
+                        <div className="flex items-center gap-2">
+                          <Switch checked={autoFix} onCheckedChange={setAutoFix} id="autofix" />
+                          <Label htmlFor="autofix" className="text-foreground/70 text-xs font-medium cursor-pointer">Auto Fix</Label>
+                        </div>
+                      )}
+
+                      {activeMode === "video-edit" && (
+                        <div className="flex items-center gap-2">
+                          <Switch checked={keepAudio} onCheckedChange={setKeepAudio} id="keepaudio" />
+                          <Label htmlFor="keepaudio" className="text-foreground/70 text-xs font-medium cursor-pointer">Keep Audio</Label>
+                        </div>
+                      )}
 
                       <Button
                         onClick={handleGenerate}
