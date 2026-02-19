@@ -226,93 +226,92 @@ const ImageGenerate = () => {
 
                 {/* Text to Image */}
                 <TabsContent value="generate">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-1 space-y-5">
-                      <div className="liquid-glass-card-sm p-6 space-y-5">
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Prompt</Label>
-                          <Textarea
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            placeholder="Describe the image you want to create..."
-                            className="min-h-[120px] bg-input/50 border-border/50 rounded-xl resize-none focus:border-primary"
-                          />
+                  <div className="space-y-6">
+                    {/* Controls bar */}
+                    <div className="liquid-glass-card-sm p-5">
+                      <div className="flex flex-col gap-4">
+                        <Textarea
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          placeholder="Describe the image you want to create..."
+                          className="min-h-[80px] bg-input/50 border-border/50 rounded-xl resize-none focus:border-primary"
+                        />
+                        <div className="flex flex-wrap items-end gap-4">
+                          <div className="space-y-1.5 min-w-[130px]">
+                            <Label className="text-foreground/70 text-xs font-medium">Aspect Ratio</Label>
+                            <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {ASPECT_RATIOS.map((ar) => (
+                                  <SelectItem key={ar.value} value={ar.value}>{ar.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5 min-w-[100px]">
+                            <Label className="text-foreground/70 text-xs font-medium">Resolution</Label>
+                            <Select value={resolution} onValueChange={setResolution}>
+                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {RESOLUTIONS.map((r) => (
+                                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5 min-w-[100px]">
+                            <Label className="text-foreground/70 text-xs font-medium">Format</Label>
+                            <Select value={outputFormat} onValueChange={setOutputFormat}>
+                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {OUTPUT_FORMATS.map((f) => (
+                                  <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5 min-w-[140px]">
+                            <Label className="text-foreground/70 text-xs font-medium">
+                              Images: {numImages}
+                            </Label>
+                            <Slider
+                              value={[numImages]}
+                              onValueChange={([v]) => setNumImages(v)}
+                              min={1}
+                              max={4}
+                              step={1}
+                              className="py-2"
+                            />
+                          </div>
+                          <Button
+                            onClick={handleGenerate}
+                            disabled={loading || !prompt.trim()}
+                            className="btn-premium rounded-xl h-9 px-6 text-sm ml-auto"
+                          >
+                            {loading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <Wand2 className="w-4 h-4 mr-2" />
+                                Generate
+                              </>
+                            )}
+                          </Button>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Aspect Ratio</Label>
-                          <Select value={aspectRatio} onValueChange={setAspectRatio}>
-                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {ASPECT_RATIOS.map((ar) => (
-                                <SelectItem key={ar.value} value={ar.value}>{ar.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Resolution</Label>
-                          <Select value={resolution} onValueChange={setResolution}>
-                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {RESOLUTIONS.map((r) => (
-                                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Output Format</Label>
-                          <Select value={outputFormat} onValueChange={setOutputFormat}>
-                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {OUTPUT_FORMATS.map((f) => (
-                                <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">
-                            Number of Images: {numImages}
-                          </Label>
-                          <Slider
-                            value={[numImages]}
-                            onValueChange={([v]) => setNumImages(v)}
-                            min={1}
-                            max={4}
-                            step={1}
-                            className="py-2"
-                          />
-                        </div>
-                        <Button
-                          onClick={handleGenerate}
-                          disabled={loading || !prompt.trim()}
-                          className="w-full btn-premium rounded-xl h-12 text-base"
-                        >
-                          {loading ? (
-                            <>
-                              <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                              Generating...
-                            </>
-                          ) : (
-                            <>
-                              <Wand2 className="w-5 h-5 mr-2" />
-                              Generate
-                            </>
-                          )}
-                        </Button>
                       </div>
                     </div>
 
-                    <div className="lg:col-span-2">
-                      <ResultsArea results={results} loading={loading} error={error} onDownload={downloadImage} />
-                    </div>
+                    {/* Results */}
+                    <ResultsArea results={results} loading={loading} error={error} onDownload={downloadImage} />
                   </div>
                 </TabsContent>
 
