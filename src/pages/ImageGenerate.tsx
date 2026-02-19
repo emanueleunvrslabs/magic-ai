@@ -13,11 +13,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, ImageIcon, Wand2, Upload, X } from "lucide-react";
 
 const IMAGE_SIZES = [
-  { label: "Square (1024×1024)", value: "square_hd" },
-  { label: "Portrait (768×1024)", value: "portrait_4_3" },
-  { label: "Landscape (1024×768)", value: "landscape_4_3" },
-  { label: "Wide (1024×576)", value: "landscape_16_9" },
-  { label: "Tall (576×1024)", value: "portrait_16_9" },
+  { label: "1:1", value: "square_hd" },
+  { label: "4:3", value: "landscape_4_3" },
+  { label: "3:4", value: "portrait_4_3" },
+  { label: "16:9", value: "landscape_16_9" },
+  { label: "9:16", value: "portrait_16_9" },
 ];
 
 const ImageGenerate = () => {
