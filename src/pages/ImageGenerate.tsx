@@ -268,24 +268,24 @@ const ImageGenerate = () => {
                               ))}
                             </div>
                           </div>
-                          <Button
-                            onClick={handleGenerate}
-                            disabled={loading || !prompt.trim()}
-                            className="btn-premium rounded-xl h-9 px-6 text-sm"
-                          >
-                            {loading ? (
-                              <>
-                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                                Generating...
-                              </>
-                            ) : (
-                              <>
-                                <Wand2 className="w-4 h-4 mr-2" />
-                                Generate
-                              </>
-                            )}
-                          </Button>
                         </div>
+                        <Button
+                          onClick={handleGenerate}
+                          disabled={loading || !prompt.trim()}
+                          className="w-full btn-premium rounded-xl h-12 text-base"
+                        >
+                          {loading ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Wand2 className="w-5 h-5 mr-2" />
+                              Generate
+                            </>
+                          )}
+                        </Button>
                       </div>
                     </div>
 
