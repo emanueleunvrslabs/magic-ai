@@ -248,7 +248,7 @@ const ImageGenerate = () => {
                             </Select>
                           </div>
                         </div>
-                        <div className="flex items-end justify-between gap-4">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                           <div className="space-y-1.5">
                             <Label className="text-foreground/70 text-xs font-medium">Images</Label>
                             <div className="flex gap-1.5">
@@ -268,24 +268,24 @@ const ImageGenerate = () => {
                               ))}
                             </div>
                           </div>
+                          <Button
+                            onClick={handleGenerate}
+                            disabled={loading || !prompt.trim()}
+                            className="w-full md:w-auto btn-premium rounded-xl h-12 md:h-9 text-base md:text-sm md:px-6"
+                          >
+                            {loading ? (
+                              <>
+                                <Loader2 className="w-5 md:w-4 h-5 md:h-4 animate-spin mr-2" />
+                                Generating...
+                              </>
+                            ) : (
+                              <>
+                                <Wand2 className="w-5 md:w-4 h-5 md:h-4 mr-2" />
+                                Generate
+                              </>
+                            )}
+                          </Button>
                         </div>
-                        <Button
-                          onClick={handleGenerate}
-                          disabled={loading || !prompt.trim()}
-                          className="w-full btn-premium rounded-xl h-12 text-base"
-                        >
-                          {loading ? (
-                            <>
-                              <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                              Generating...
-                            </>
-                          ) : (
-                            <>
-                              <Wand2 className="w-5 h-5 mr-2" />
-                              Generate
-                            </>
-                          )}
-                        </Button>
                       </div>
                     </div>
 
@@ -383,23 +383,25 @@ const ImageGenerate = () => {
                             </Select>
                           </div>
                         </div>
-                        <Button
-                          onClick={handleEdit}
-                          disabled={loading || !editPrompt.trim() || editImages.length === 0}
-                          className="w-full btn-premium rounded-xl h-12 text-base"
-                        >
-                          {loading ? (
-                            <>
-                              <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                              Editing...
-                            </>
-                          ) : (
-                            <>
-                              <Wand2 className="w-5 h-5 mr-2" />
-                              Edit Image
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex justify-end">
+                          <Button
+                            onClick={handleEdit}
+                            disabled={loading || !editPrompt.trim() || editImages.length === 0}
+                            className="w-full md:w-auto btn-premium rounded-xl h-12 md:h-9 text-base md:text-sm md:px-6"
+                          >
+                            {loading ? (
+                              <>
+                                <Loader2 className="w-5 md:w-4 h-5 md:h-4 animate-spin mr-2" />
+                                Editing...
+                              </>
+                            ) : (
+                              <>
+                                <Wand2 className="w-5 md:w-4 h-5 md:h-4 mr-2" />
+                                Edit Image
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
 
