@@ -101,8 +101,12 @@ const VideoGenerate = () => {
   useEffect(() => {
     const state = location.state as { imageUrl?: string } | null;
     if (state?.imageUrl) {
+      const item = { url: state.imageUrl, preview: state.imageUrl };
       setActiveMode("image-to-video");
-      setImageUrl({ url: state.imageUrl, preview: state.imageUrl });
+      setImageUrl(item);
+      // Also pre-fill first frame and reference images
+      setFirstFrameUrl(item);
+      setReferenceImages([item]);
       const c = MODE_CONFIG["image-to-video"];
       setAspectRatio(c.defaultAspect);
       setDuration(c.defaultDuration);
