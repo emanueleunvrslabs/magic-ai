@@ -1,21 +1,26 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginDialog } from "@/components/auth/LoginDialog";
+import { CreditsDialog } from "@/components/credits/CreditsDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "Image", href: "/image" },
   { label: "Video", href: "/video" },
+  { label: "Profile", href: "/profile", authOnly: true },
 ];
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [creditsOpen, setCreditsOpen] = useState(false);
+  const [balance, setBalance] = useState<number | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const activeLink = location.pathname;
@@ -29,17 +34,45 @@ export const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Load balance
+  useEffect(() => {
+    if (!user) { setBalance(null); return; }
+    const load = async () => {
+      const { data } = await supabase
+        .from("user_credits")
+        .select("balance")
+        .eq("user_id", user.id)
+        .single();
+      setBalance(data?.balance ?? 0);
+    };
+    load();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel("navbar-credits")
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_credits", filter: `user_id=eq.${user.id}` }, (payload: any) => {
+        if (payload.new?.balance !== undefined) {
+          setBalance(payload.new.balance);
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
   const handleLinkClick = () => {
     setMobileOpen(false);
   };
 
   const handleAuthButton = () => {
     if (user) {
-      navigate("/profile");
+      setCreditsOpen(true);
     } else {
       setLoginOpen(true);
     }
   };
+
+  const visibleLinks = navLinks.filter(link => !link.authOnly || user);
 
   return (
     <>
@@ -73,9 +106,8 @@ export const Navbar = () => {
           
           <div className="w-px h-5 bg-white/15 mx-1" />
           
-          {navLinks.map((link) => {
-            const isRoute = link.href.startsWith("/");
-            const isActive = isRoute ? activeLink === link.href : false;
+          {visibleLinks.map((link) => {
+            const isActive = activeLink === link.href;
             
             return (
               <motion.div
@@ -122,8 +154,8 @@ export const Navbar = () => {
           >
             {user ? (
               <>
-                <User className="w-4 h-4" />
-                Profile
+                <Wallet className="w-4 h-4" />
+                €{balance !== null ? balance.toFixed(2) : "—"}
               </>
             ) : (
               "Login"
@@ -142,14 +174,26 @@ export const Navbar = () => {
             <span className="text-primary font-bold text-lg">magic ai</span>
             <span className="text-xs text-muted-foreground font-medium">by unvrs labs</span>
           </div>
-          <motion.button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="text-foreground p-2 rounded-full liquid-glass"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </motion.button>
+          <div className="flex items-center gap-2">
+            {user && (
+              <motion.button
+                onClick={() => setCreditsOpen(true)}
+                className="text-foreground text-sm font-semibold px-3 py-1.5 rounded-full liquid-glass flex items-center gap-1.5"
+                whileTap={{ scale: 0.95 }}
+              >
+                <Wallet className="w-3.5 h-3.5 text-primary" />
+                €{balance !== null ? balance.toFixed(2) : "—"}
+              </motion.button>
+            )}
+            <motion.button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="text-foreground p-2 rounded-full liquid-glass"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Mobile Menu - Liquid Glass Panel */}
@@ -163,7 +207,7 @@ export const Navbar = () => {
               className="lg:hidden fixed top-[5rem] left-4 right-4 z-50 rounded-[1.5rem] overflow-hidden liquid-glass-card"
             >
               <div className="flex flex-col p-4 gap-1">
-                {navLinks.map((link, index) => (
+                {visibleLinks.map((link, index) => (
                   <motion.div
                     key={link.href}
                     initial={{ opacity: 0, x: -20 }}
@@ -184,28 +228,20 @@ export const Navbar = () => {
                     </Link>
                   </motion.div>
                 ))}
-                <div className="h-px bg-white/10 my-2" />
-                <motion.button
-                  onClick={() => { handleLinkClick(); handleAuthButton(); }}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className={cn(
-                    "px-4 py-3 rounded-xl text-base font-semibold text-center flex items-center justify-center gap-2",
-                    user
-                      ? "text-foreground hover:bg-white/5"
-                      : "text-primary-foreground bg-gradient-to-r from-primary to-primary/80"
-                  )}
-                >
-                  {user ? (
-                    <>
-                      <User className="w-4 h-4" />
-                      Profile
-                    </>
-                  ) : (
-                    "Login"
-                  )}
-                </motion.button>
+                {!user && (
+                  <>
+                    <div className="h-px bg-white/10 my-2" />
+                    <motion.button
+                      onClick={() => { handleLinkClick(); setLoginOpen(true); }}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="px-4 py-3 rounded-xl text-base font-semibold text-center text-primary-foreground bg-gradient-to-r from-primary to-primary/80"
+                    >
+                      Login
+                    </motion.button>
+                  </>
+                )}
               </div>
             </motion.div>
           )}
@@ -214,6 +250,7 @@ export const Navbar = () => {
 
       {/* Dialogs */}
       <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
+      {user && <CreditsDialog open={creditsOpen} onOpenChange={setCreditsOpen} userId={user.id} />}
     </>
   );
 };
