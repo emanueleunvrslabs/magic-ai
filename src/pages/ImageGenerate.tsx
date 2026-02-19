@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, ImageIcon, Wand2, Upload, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const ASPECT_RATIOS = [
   { label: "Auto", value: "auto" },
@@ -182,22 +183,45 @@ const ImageGenerate = () => {
             >
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div className="flex justify-center mb-8">
-                  <TabsList className="liquid-glass-card-sm p-1.5 bg-transparent border border-border/50">
-                    <TabsTrigger
-                      value="generate"
-                      className="px-6 py-2.5 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                    >
-                      <ImageIcon className="w-4 h-4 mr-2" />
-                      Text to Image
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="edit"
-                      className="px-6 py-2.5 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all"
-                    >
-                      <Wand2 className="w-4 h-4 mr-2" />
-                      Image Edit
-                    </TabsTrigger>
-                  </TabsList>
+                  <div className="liquid-glass-nav rounded-full p-1.5 flex items-center gap-1"
+                    style={{
+                      boxShadow: '0 4px 24px hsl(0 0% 0% / 0.15), inset 0 1px 0 0 hsl(0 0% 100% / 0.08)'
+                    }}
+                  >
+                    {[
+                      { value: "generate", label: "Text to Image", icon: <ImageIcon className="w-4 h-4" /> },
+                      { value: "edit", label: "Image Edit", icon: <Wand2 className="w-4 h-4" /> },
+                    ].map((tab) => (
+                      <motion.button
+                        key={tab.value}
+                        onClick={() => setActiveTab(tab.value)}
+                        className={cn(
+                          "relative px-5 py-2 text-sm font-medium transition-all duration-300 rounded-full flex items-center gap-2",
+                          activeTab === tab.value
+                            ? "text-primary"
+                            : "text-foreground/70 hover:text-foreground"
+                        )}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        {activeTab === tab.value && (
+                          <motion.div
+                            layoutId="activeImageTab"
+                            className="absolute inset-0 rounded-full liquid-glass"
+                            style={{
+                              background: 'linear-gradient(135deg, hsl(270 80% 65% / 0.15) 0%, hsl(270 80% 65% / 0.05) 100%)',
+                              border: '1px solid hsl(270 80% 65% / 0.25)'
+                            }}
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                          />
+                        )}
+                        <span className="relative z-10 flex items-center gap-2">
+                          {tab.icon}
+                          {tab.label}
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Text to Image */}
