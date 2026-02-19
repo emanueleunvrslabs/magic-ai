@@ -578,34 +578,32 @@ const VideoResultsArea = ({
                   <video
                     src={vid.url}
                     className="w-full h-full rounded-xl object-cover"
-                    muted
+                    controls
                     loop
                     playsInline
-                    onMouseEnter={(e) => (e.target as HTMLVideoElement).play()}
-                    onMouseLeave={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
                   />
-                  {/* Overlay actions */}
-                  <div className="absolute inset-0 rounded-xl bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  {/* Action bar */}
+                  <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={() => handleDirectDownload(vid.url, i)}
-                      className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                      className="p-1.5 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
                       title="Download"
                     >
-                      <Download className="w-4 h-4" />
+                      <Download className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleShare(vid.url)}
-                      className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                      className="p-1.5 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
                       title="Share"
                     >
-                      <Share2 className="w-4 h-4" />
+                      <Share2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => setPreviewUrl(vid.url)}
-                      className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
-                      title="Preview"
+                      className="p-1.5 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                      title="Fullscreen"
                     >
-                      <Expand className="w-4 h-4" />
+                      <Expand className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </motion.div>
