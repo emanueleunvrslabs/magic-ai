@@ -329,10 +329,10 @@ const VideoGenerate = () => {
                   }}
                 >
                   <Select value={model} onValueChange={handleModelChange}>
-                    <SelectTrigger className="px-4 py-2 text-sm font-medium rounded-full liquid-glass border-none min-w-[140px]">
+                    <SelectTrigger className="px-4 py-2 text-sm font-medium rounded-full border-none min-w-[130px] bg-transparent text-foreground/70 hover:text-foreground transition-all duration-300 focus:ring-0 focus:ring-offset-0 data-[state=open]:text-primary [&>span]:text-inherit">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-card border-border z-50">
+                    <SelectContent className="bg-card border-border z-50 rounded-xl">
                       {VIDEO_MODELS.map((m) => (
                         <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
                       ))}
