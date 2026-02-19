@@ -96,8 +96,8 @@ export const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-sm w-full p-0 bg-background/95 backdrop-blur-xl border-border/30 rounded-2xl overflow-hidden">
-        <div className="p-6">
+      <DialogContent className="max-w-sm w-full p-0 bg-background/95 backdrop-blur-xl border-border/30 rounded-2xl overflow-hidden sm:top-[50%] top-[10%] translate-y-0 sm:translate-y-[-50%]">
+        <div className="p-6 overflow-y-auto max-h-[80dvh]">
           <AnimatePresence mode="wait">
             {step === "phone" && (
               <motion.div
@@ -125,6 +125,9 @@ export const LoginDialog = ({ open, onOpenChange }: LoginDialogProps) => {
                     placeholder="+39 123 456 7890"
                     className="bg-input/50 border-border/50 rounded-xl h-11 text-base"
                     type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    onFocus={(e) => e.target.scrollIntoView({ behavior: "smooth", block: "center" })}
                     onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
                   />
                   <p className="text-[11px] text-muted-foreground">
