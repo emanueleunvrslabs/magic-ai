@@ -552,7 +552,7 @@ const ResultsArea = ({
 
       {/* Lightbox preview */}
       <Dialog open={!!previewUrl} onOpenChange={() => setPreviewUrl(null)}>
-        <DialogContent className="max-w-4xl w-full p-2 bg-background/95 backdrop-blur-xl border-border/30">
+        <DialogContent className="max-w-4xl w-full p-2 bg-background/95 backdrop-blur-xl border-none shadow-none">
           {previewUrl && (
             <img
               src={previewUrl}
