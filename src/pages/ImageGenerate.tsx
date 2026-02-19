@@ -249,18 +249,24 @@ const ImageGenerate = () => {
                           </div>
                         </div>
                         <div className="flex items-end gap-4">
-                          <div className="space-y-1.5 flex-1">
-                            <Label className="text-foreground/70 text-xs font-medium">
-                              Images: {numImages}
-                            </Label>
-                            <Slider
-                              value={[numImages]}
-                              onValueChange={([v]) => setNumImages(v)}
-                              min={1}
-                              max={4}
-                              step={1}
-                              className="py-2"
-                            />
+                          <div className="space-y-1.5">
+                            <Label className="text-foreground/70 text-xs font-medium">Images</Label>
+                            <div className="flex gap-1.5">
+                              {[1, 2, 3, 4].map((n) => (
+                                <button
+                                  key={n}
+                                  onClick={() => setNumImages(n)}
+                                  className={cn(
+                                    "w-9 h-9 rounded-lg text-sm font-medium transition-all duration-200",
+                                    numImages === n
+                                      ? "bg-primary text-primary-foreground shadow-md"
+                                      : "bg-input/50 border border-border/50 text-foreground/70 hover:border-primary/50 hover:text-foreground"
+                                  )}
+                                >
+                                  {n}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                           <Button
                             onClick={handleGenerate}
