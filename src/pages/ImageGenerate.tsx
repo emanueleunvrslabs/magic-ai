@@ -13,6 +13,7 @@ import { Loader2, Download, ImageIcon, Wand2, Upload, X, Share2, Expand, Video }
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useGeneration } from "@/contexts/GenerationContext";
+import { useNavigate } from "react-router-dom";
 
 const ASPECT_RATIOS = [
   { label: "Auto", value: "auto" },
@@ -41,6 +42,7 @@ const OUTPUT_FORMATS = [
 ];
 
 const ImageGenerate = () => {
+  const navigate = useNavigate();
   const { imageResults, imageJobs, generateImages } = useGeneration();
   const [activeTab, setActiveTab] = useState("generate");
 
@@ -268,7 +270,7 @@ const ImageGenerate = () => {
                     </div>
 
                     {/* Results */}
-                    <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} />
+                    <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} onGenerateVideo={(url) => navigate("/video", { state: { imageUrl: url } })} />
                   </div>
                 </TabsContent>
 
@@ -385,7 +387,7 @@ const ImageGenerate = () => {
                     </div>
 
                     <div className="lg:col-span-2">
-                      <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} />
+                      <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} onGenerateVideo={(url) => navigate("/video", { state: { imageUrl: url } })} />
                     </div>
                   </div>
                 </TabsContent>
@@ -405,11 +407,13 @@ const ResultsArea = ({
   loading,
   error,
   onDownload,
+  onGenerateVideo,
 }: {
   results: Array<{ url: string }>;
   loading: boolean;
   error: string;
   onDownload: (url: string, i: number) => void;
+  onGenerateVideo?: (url: string) => void;
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -503,6 +507,7 @@ const ResultsArea = ({
                       </button>
                     </div>
                     <button
+                      onClick={() => onGenerateVideo?.(img.url)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full liquid-glass text-xs font-medium text-foreground hover:text-primary transition-colors"
                     >
                       <Video className="w-3.5 h-3.5" />
