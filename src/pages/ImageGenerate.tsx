@@ -290,11 +290,13 @@ const ImageGenerate = () => {
 
                 {/* Image Edit */}
                 <TabsContent value="edit">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-1 space-y-5">
-                      <div className="liquid-glass-card-sm p-6 space-y-5">
+                  <div className="space-y-6">
+                    {/* Controls bar — same horizontal layout as Text to Image */}
+                    <div className="liquid-glass-card-sm p-5">
+                      <div className="flex flex-col gap-4">
+                        {/* Source images upload area */}
                         <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Source Images</Label>
+                          <Label className="text-foreground/70 text-xs font-medium">Source Images</Label>
                           <input
                             ref={fileInputRef}
                             type="file"
@@ -303,49 +305,42 @@ const ImageGenerate = () => {
                             onChange={handleFileUpload}
                             className="hidden"
                           />
-                          {editImages.length > 0 && (
-                            <div className="grid grid-cols-2 gap-2">
-                              {editImages.map((img, i) => (
-                                <div key={i} className="relative group">
-                                  <img
-                                    src={img.preview}
-                                    alt={`Source ${i + 1}`}
-                                    className="w-full rounded-lg border border-border/50 object-cover h-24"
-                                  />
-                                  <button
-                                    onClick={() => removeEditImage(i)}
-                                    className="absolute top-1 right-1 p-1 rounded-full bg-destructive/80 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-full h-24 rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
-                          >
-                            <Upload className="w-5 h-5" />
-                            <span className="text-sm">
-                              {editImages.length > 0 ? "Add more images" : "Upload images"}
-                            </span>
-                          </button>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            {editImages.map((img, i) => (
+                              <div key={i} className="relative group">
+                                <img
+                                  src={img.preview}
+                                  alt={`Source ${i + 1}`}
+                                  className="w-16 h-16 rounded-lg border border-border/50 object-cover"
+                                />
+                                <button
+                                  onClick={() => removeEditImage(i)}
+                                  className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full bg-destructive/80 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                            <button
+                              onClick={() => fileInputRef.current?.click()}
+                              className="w-16 h-16 rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-1 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                            >
+                              <Upload className="w-4 h-4" />
+                              <span className="text-[10px]">Upload</span>
+                            </button>
+                          </div>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Edit Prompt</Label>
-                          <Textarea
-                            value={editPrompt}
-                            onChange={(e) => setEditPrompt(e.target.value)}
-                            placeholder="Describe how to edit the image..."
-                            className="min-h-[100px] bg-input/50 border-border/50 rounded-xl resize-none focus:border-primary"
-                          />
-                        </div>
+                        <Textarea
+                          value={editPrompt}
+                          onChange={(e) => setEditPrompt(e.target.value)}
+                          placeholder="Describe how to edit the image..."
+                          className="min-h-[80px] bg-input/50 border-border/50 rounded-xl resize-none focus:border-primary"
+                        />
                         <div className="grid grid-cols-3 gap-3">
-                          <div className="space-y-2">
-                            <Label className="text-foreground/90 font-medium">Aspect Ratio</Label>
+                          <div className="space-y-1.5">
+                            <Label className="text-foreground/70 text-xs font-medium">Aspect Ratio</Label>
                             <Select value={editAspectRatio} onValueChange={setEditAspectRatio}>
-                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -355,10 +350,10 @@ const ImageGenerate = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-2">
-                            <Label className="text-foreground/90 font-medium">Resolution</Label>
+                          <div className="space-y-1.5">
+                            <Label className="text-foreground/70 text-xs font-medium">Resolution</Label>
                             <Select value={editResolution} onValueChange={setEditResolution}>
-                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -368,10 +363,10 @@ const ImageGenerate = () => {
                               </SelectContent>
                             </Select>
                           </div>
-                          <div className="space-y-2">
-                            <Label className="text-foreground/90 font-medium">Format</Label>
+                          <div className="space-y-1.5">
+                            <Label className="text-foreground/70 text-xs font-medium">Format</Label>
                             <Select value={editOutputFormat} onValueChange={setEditOutputFormat}>
-                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl h-9 text-sm">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -382,29 +377,30 @@ const ImageGenerate = () => {
                             </Select>
                           </div>
                         </div>
-                        <Button
-                          onClick={handleEdit}
-                          disabled={loading || !editPrompt.trim() || editImages.length === 0}
-                          className="w-full btn-premium rounded-xl h-12 text-base"
-                        >
-                          {loading ? (
-                            <>
-                              <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                              Editing...
-                            </>
-                          ) : (
-                            <>
-                              <Wand2 className="w-5 h-5 mr-2" />
-                              Edit Image
-                            </>
-                          )}
-                        </Button>
+                        <div className="flex justify-end">
+                          <Button
+                            onClick={handleEdit}
+                            disabled={loading || !editPrompt.trim() || editImages.length === 0}
+                            className="btn-premium rounded-xl h-9 px-6 text-sm"
+                          >
+                            {loading ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                Editing...
+                              </>
+                            ) : (
+                              <>
+                                <Wand2 className="w-4 h-4 mr-2" />
+                                Edit Image
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="lg:col-span-2">
-                      <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} onGenerateVideo={(url) => navigate("/video", { state: { imageUrl: url } })} onDelete={(url) => deleteMedia(url, "image")} />
-                    </div>
+                    {/* Results */}
+                    <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} onGenerateVideo={(url) => navigate("/video", { state: { imageUrl: url } })} onDelete={(url) => deleteMedia(url, "image")} />
                   </div>
                 </TabsContent>
               </Tabs>
