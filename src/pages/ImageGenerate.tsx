@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/landing/Footer";
@@ -9,11 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, ImageIcon, Wand2, Upload, X, Share2, Expand, Video } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useGeneration } from "@/contexts/GenerationContext";
 
 const ASPECT_RATIOS = [
   { label: "Auto", value: "auto" },
@@ -42,7 +41,7 @@ const OUTPUT_FORMATS = [
 ];
 
 const ImageGenerate = () => {
-  const { user } = useAuth();
+  const { imageResults, imageJobs, generateImages } = useGeneration();
   const [activeTab, setActiveTab] = useState("generate");
 
   // Text-to-image state
@@ -60,37 +59,10 @@ const ImageGenerate = () => {
   const [editOutputFormat, setEditOutputFormat] = useState("png");
 
   // Common state
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<Array<{ url: string }>>([]);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load saved images on mount
-  useEffect(() => {
-    if (!user) return;
-    const loadSaved = async () => {
-      const { data } = await supabase
-        .from("generated_media")
-        .select("url")
-        .eq("user_id", user.id)
-        .eq("media_type", "image")
-        .order("created_at", { ascending: false });
-      if (data?.length) {
-        setResults(data.map((r) => ({ url: r.url })));
-      }
-    };
-    loadSaved();
-  }, [user]);
-
-  const saveMedia = async (urls: string[]) => {
-    if (!user) return;
-    const rows = urls.map((url) => ({
-      user_id: user.id,
-      media_type: "image" as const,
-      url,
-    }));
-    await supabase.from("generated_media").insert(rows);
-  };
+  const loading = imageJobs.some((j) => j.status === "pending");
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -112,66 +84,32 @@ const ImageGenerate = () => {
     setEditImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     if (!prompt.trim()) return;
-    setLoading(true);
     setError("");
-
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("fal-ai-generate", {
-        body: {
-          mode: "generate",
-          prompt,
-          num_images: numImages,
-          aspect_ratio: aspectRatio,
-          output_format: outputFormat,
-          resolution,
-          safety_tolerance: "6",
-        },
-      });
-
-      if (fnError) throw new Error(fnError.message);
-      if (data?.error) throw new Error(data.error);
-
-      const newImages = data?.images || [];
-      setResults(prev => [...newImages, ...prev]);
-      await saveMedia(newImages.map((img: { url: string }) => img.url));
-    } catch (err: any) {
-      setError(err.message || "Generation failed");
-    } finally {
-      setLoading(false);
-    }
+    generateImages({
+      mode: "generate",
+      prompt,
+      num_images: numImages,
+      aspect_ratio: aspectRatio,
+      output_format: outputFormat,
+      resolution,
+      safety_tolerance: "6",
+    });
   };
 
-  const handleEdit = async () => {
+  const handleEdit = () => {
     if (!editPrompt.trim() || editImages.length === 0) return;
-    setLoading(true);
     setError("");
-
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke("fal-ai-generate", {
-        body: {
-          mode: "edit",
-          prompt: editPrompt,
-          image_urls: editImages.map((img) => img.url),
-          aspect_ratio: editAspectRatio,
-          output_format: editOutputFormat,
-          resolution: editResolution,
-          safety_tolerance: "6",
-        },
-      });
-
-      if (fnError) throw new Error(fnError.message);
-      if (data?.error) throw new Error(data.error);
-
-      const newImages = data?.images || [];
-      setResults(prev => [...newImages, ...prev]);
-      await saveMedia(newImages.map((img: { url: string }) => img.url));
-    } catch (err: any) {
-      setError(err.message || "Edit failed");
-    } finally {
-      setLoading(false);
-    }
+    generateImages({
+      mode: "edit",
+      prompt: editPrompt,
+      image_urls: editImages.map((img) => img.url),
+      aspect_ratio: editAspectRatio,
+      output_format: editOutputFormat,
+      resolution: editResolution,
+      safety_tolerance: "6",
+    });
   };
 
   const downloadImage = (url: string, index: number) => {
@@ -330,7 +268,7 @@ const ImageGenerate = () => {
                     </div>
 
                     {/* Results */}
-                    <ResultsArea results={results} loading={loading} error={error} onDownload={downloadImage} />
+                    <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} />
                   </div>
                 </TabsContent>
 
@@ -447,7 +385,7 @@ const ImageGenerate = () => {
                     </div>
 
                     <div className="lg:col-span-2">
-                      <ResultsArea results={results} loading={loading} error={error} onDownload={downloadImage} />
+                      <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} />
                     </div>
                   </div>
                 </TabsContent>
