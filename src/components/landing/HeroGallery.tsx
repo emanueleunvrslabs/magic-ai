@@ -22,13 +22,17 @@ function useLiveCounter(base: number) {
   const countRef = useRef(base);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Randomly fluctuate: +1 to +3 or -1, biased toward increase
-      const delta = Math.random() < 0.15 ? -1 : Math.ceil(Math.random() * 3);
-      countRef.current = Math.max(base - 200, countRef.current + delta);
+    const tick = () => {
+      // ~45% chance decrease, ~55% chance increase for natural fluctuation
+      const r = Math.random();
+      const delta = r < 0.45
+        ? -Math.ceil(Math.random() * 5)   // decrease 1-5
+        : Math.ceil(Math.random() * 4);    // increase 1-4
+      countRef.current = Math.max(base - 300, Math.min(base + 300, countRef.current + delta));
       setCount(countRef.current);
-    }, 2000 + Math.random() * 3000);
-    return () => clearInterval(interval);
+    };
+    const id = setInterval(tick, 1500 + Math.random() * 2500);
+    return () => clearInterval(id);
   }, [base]);
 
   return count;
