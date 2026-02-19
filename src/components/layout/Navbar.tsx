@@ -98,10 +98,7 @@ export const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="pr-4 pl-2">
             <span className="text-lg font-bold text-primary">
-              magic ai
-            </span>
-            <span className="text-xs text-muted-foreground ml-1.5 font-medium">
-              by unvrs labs
+              Magic Ai
             </span>
           </Link>
           
@@ -172,8 +169,7 @@ export const Navbar = () => {
           )}
         >
           <div className="flex items-center gap-1">
-            <span className="text-primary font-bold text-lg">magic ai</span>
-            <span className="text-xs text-muted-foreground font-medium">by unvrs labs</span>
+            <span className="text-primary font-bold text-lg">Magic Ai</span>
           </div>
           <div className="flex items-center gap-2">
             {user && (
