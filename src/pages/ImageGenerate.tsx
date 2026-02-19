@@ -340,31 +340,33 @@ const ImageGenerate = () => {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Resolution</Label>
-                          <Select value={editResolution} onValueChange={setEditResolution}>
-                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {RESOLUTIONS.map((r) => (
-                                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Output Format</Label>
-                          <Select value={editOutputFormat} onValueChange={setEditOutputFormat}>
-                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {OUTPUT_FORMATS.map((f) => (
-                                <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <Label className="text-foreground/90 font-medium">Resolution</Label>
+                            <Select value={editResolution} onValueChange={setEditResolution}>
+                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {RESOLUTIONS.map((r) => (
+                                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-foreground/90 font-medium">Format</Label>
+                            <Select value={editOutputFormat} onValueChange={setEditOutputFormat}>
+                              <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {OUTPUT_FORMATS.map((f) => (
+                                  <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                         <Button
                           onClick={handleEdit}
