@@ -84,14 +84,25 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
       (async () => {
         try {
           const { data, error } = await supabase.functions.invoke("fal-ai-generate", { body: params });
+          console.log("fal-ai-generate response:", JSON.stringify(data));
           if (error) throw new Error(error.message);
           if (data?.error) throw new Error(data.error);
 
-          const newImages: Array<{ url: string }> = data?.images || [];
-          setImageResults((prev) => [...newImages, ...prev]);
-          await saveMedia(newImages.map((img) => img.url), "image");
+          // fal.ai may return images under "images" or "output" depending on model
+          const rawImages = data?.images || data?.output?.images || data?.data?.images || [];
+          const newImages: Array<{ url: string }> = Array.isArray(rawImages)
+            ? rawImages.map((img: any) => ({ url: typeof img === "string" ? img : img.url }))
+            : [];
+          
+          console.log("Parsed images:", newImages.length, newImages);
+          
+          if (newImages.length > 0) {
+            setImageResults((prev) => [...newImages, ...prev]);
+            await saveMedia(newImages.map((img) => img.url), "image");
+          }
           setImageJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, status: "done" } : j)));
         } catch (err: any) {
+          console.error("Image generation error:", err);
           setImageJobs((prev) =>
             prev.map((j) => (j.id === jobId ? { ...j, status: "error", error: err.message } : j))
           );
