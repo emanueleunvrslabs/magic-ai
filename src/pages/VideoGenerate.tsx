@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 import { Loader2, Video, Upload, X, Film, ImageIcon, Layers, Play, ArrowRight, Download, Share2, Expand, Trash2, Scissors } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -323,13 +324,14 @@ const VideoGenerate = () => {
             >
               <div className="flex justify-center mb-8">
                 <div
-                  className="liquid-glass-nav rounded-2xl sm:rounded-full p-1.5 flex flex-wrap sm:flex-nowrap items-center gap-1 justify-center max-w-full"
+                  className="liquid-glass-nav rounded-full p-1.5 flex items-center gap-1 max-w-full"
                   style={{
                     boxShadow: '0 4px 24px hsl(0 0% 0% / 0.15), inset 0 1px 0 0 hsl(0 0% 100% / 0.08)',
                   }}
                 >
+                  {/* Model select - fixed */}
                   <Select value={model} onValueChange={handleModelChange}>
-                    <SelectTrigger className="px-4 py-2 text-sm font-medium rounded-full border-none w-auto bg-transparent text-foreground/70 hover:text-foreground transition-all duration-300 focus:ring-0 focus:ring-offset-0 data-[state=open]:text-primary [&>span]:text-inherit h-auto gap-1.5">
+                    <SelectTrigger className="px-4 py-2 text-sm font-medium rounded-full border-none w-auto bg-transparent text-foreground/70 hover:text-foreground transition-all duration-300 focus:ring-0 focus:ring-offset-0 data-[state=open]:text-primary [&>span]:text-inherit h-auto gap-1.5 shrink-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border z-50 rounded-xl">
@@ -338,37 +340,40 @@ const VideoGenerate = () => {
                       ))}
                     </SelectContent>
                   </Select>
-                  <div className="w-px h-6 bg-border/30 hidden sm:block" />
-                  {availableModes.map((mode) => (
-                    <motion.button
-                      key={mode.value}
-                      onClick={() => handleModeChange(mode.value)}
-                      className={cn(
-                        "relative px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-300 rounded-full flex items-center gap-1.5 sm:gap-2 whitespace-nowrap",
-                        activeMode === mode.value
-                          ? "text-primary"
-                          : "text-foreground/70 hover:text-foreground"
-                      )}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {activeMode === mode.value && (
-                        <motion.div
-                          layoutId="activeVideoTab"
-                          className="absolute inset-0 rounded-full liquid-glass"
-                          style={{
-                            background: 'linear-gradient(135deg, hsl(270 80% 65% / 0.15) 0%, hsl(270 80% 65% / 0.05) 100%)',
-                            border: '1px solid hsl(270 80% 65% / 0.25)',
-                          }}
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
-                      <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
-                        {mode.icon}
-                        <span className="hidden sm:inline">{mode.label}</span>
-                      </span>
-                    </motion.button>
-                  ))}
+                  <div className="w-px h-6 bg-border/30 shrink-0" />
+                  {/* Mode buttons - scrollable */}
+                  <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
+                    {availableModes.map((mode) => (
+                      <motion.button
+                        key={mode.value}
+                        onClick={() => handleModeChange(mode.value)}
+                        className={cn(
+                          "relative px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-300 rounded-full flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0",
+                          activeMode === mode.value
+                            ? "text-primary"
+                            : "text-foreground/70 hover:text-foreground"
+                        )}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        {activeMode === mode.value && (
+                          <motion.div
+                            layoutId="activeVideoTab"
+                            className="absolute inset-0 rounded-full liquid-glass"
+                            style={{
+                              background: 'linear-gradient(135deg, hsl(270 80% 65% / 0.15) 0%, hsl(270 80% 65% / 0.05) 100%)',
+                              border: '1px solid hsl(270 80% 65% / 0.25)',
+                            }}
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                          />
+                        )}
+                        <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+                          {mode.icon}
+                          {mode.label}
+                        </span>
+                      </motion.button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -473,10 +478,10 @@ const VideoGenerate = () => {
                       {activeMode === "reference-to-video" && (
                         <motion.div key="r2v-upload" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
                           <Label className="text-foreground/70 text-xs font-medium mb-2 block">Reference Images</Label>
-                          <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center gap-3 flex-wrap">
                             {referenceImages.map((img, i) => (
                               <div key={i} className="relative group">
-                                <img src={img.preview} alt={`Ref ${i + 1}`} className="h-16 w-16 rounded-lg object-cover" />
+                                <img src={img.preview} alt={`Ref ${i + 1}`} className="h-20 w-20 rounded-xl object-cover" />
                                 <button onClick={() => removeReferenceImage(i)} className="absolute -top-1 -right-1 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                                   <X className="w-3 h-3" />
                                 </button>
@@ -484,9 +489,9 @@ const VideoGenerate = () => {
                             ))}
                             <button
                               onClick={() => handleFileSelect("reference-images")}
-                              className="h-16 w-16 rounded-lg border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-0.5 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                              className="h-20 w-20 rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-1 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
                             >
-                              <Upload className="w-3.5 h-3.5" />
+                              <Upload className="w-4 h-4" />
                               <span className="text-[9px]">Add</span>
                             </button>
                           </div>
@@ -579,44 +584,56 @@ const VideoGenerate = () => {
                       )}
 
                       {config?.showAudio && (
-                        <div className="flex items-center gap-2">
-                          <Switch checked={generateAudio} onCheckedChange={setGenerateAudio} id="audio" />
-                          <Label htmlFor="audio" className="text-foreground/70 text-xs font-medium cursor-pointer">Audio</Label>
+                        <div className="flex items-center gap-2 pb-0.5">
+                          <Switch checked={generateAudio} onCheckedChange={setGenerateAudio} />
+                          <Label className="text-foreground/70 text-xs font-medium">Audio</Label>
                         </div>
                       )}
 
                       {config?.showAutoFix && (
-                        <div className="flex items-center gap-2">
-                          <Switch checked={autoFix} onCheckedChange={setAutoFix} id="autofix" />
-                          <Label htmlFor="autofix" className="text-foreground/70 text-xs font-medium cursor-pointer">Auto Fix</Label>
+                        <div className="flex items-center gap-2 pb-0.5">
+                          <Switch checked={autoFix} onCheckedChange={setAutoFix} />
+                          <Label className="text-foreground/70 text-xs font-medium">Auto Fix</Label>
+                        </div>
+                      )}
+
+                      {config?.showCfgScale && (
+                        <div className="space-y-1.5 min-w-[140px]">
+                          <Label className="text-foreground/70 text-xs font-medium">CFG Scale: {cfgScale}</Label>
+                          <Slider value={[cfgScale]} onValueChange={([v]) => setCfgScale(v)} min={0} max={1} step={0.1} className="w-full" />
                         </div>
                       )}
 
                       {activeMode === "video-edit" && (
-                        <div className="flex items-center gap-2">
-                          <Switch checked={keepAudio} onCheckedChange={setKeepAudio} id="keepaudio" />
-                          <Label htmlFor="keepaudio" className="text-foreground/70 text-xs font-medium cursor-pointer">Keep Audio</Label>
+                        <div className="flex items-center gap-2 pb-0.5">
+                          <Switch checked={keepAudio} onCheckedChange={setKeepAudio} />
+                          <Label className="text-foreground/70 text-xs font-medium">Keep Audio</Label>
                         </div>
                       )}
-
-                      <Button
-                        onClick={handleGenerate}
-                        disabled={loading || !canGenerate()}
-                        className="btn-premium rounded-xl h-9 px-6 text-sm ml-auto"
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                            Generating...
-                          </>
-                        ) : (
-                          <>
-                            <Video className="w-4 h-4 mr-2" />
-                            Generate
-                          </>
-                        )}
-                      </Button>
                     </div>
+
+                    {config?.showNegativePrompt && (
+                      <Textarea
+                        value={negativePrompt}
+                        onChange={(e) => setNegativePrompt(e.target.value)}
+                        placeholder="Negative prompt (what to avoid)..."
+                        className="min-h-[60px] bg-input/50 border-border/50 rounded-xl resize-none focus:border-primary text-sm"
+                      />
+                    )}
+
+                    {/* Generate button */}
+                    <Button
+                      onClick={handleGenerate}
+                      disabled={loading || !canGenerate()}
+                      className="btn-premium rounded-xl h-11 w-full sm:w-auto sm:self-end px-8"
+                    >
+                      {loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      ) : (
+                        <Video className="w-4 h-4 mr-2" />
+                      )}
+                      Generate
+                    </Button>
                   </div>
                 </div>
 
