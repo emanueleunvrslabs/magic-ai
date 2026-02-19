@@ -2,17 +2,19 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Link, useLocation } from "react-router-dom";
 
 const navLinks = [
-  { label: "Home", href: "#" },
-  { label: "Image", href: "#image" },
+  { label: "Home", href: "/" },
+  { label: "Image", href: "/image" },
   { label: "Video", href: "#video" },
 ];
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [activeLink, setActiveLink] = useState("#");
+  const location = useLocation();
+  const activeLink = location.pathname;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,8 +24,7 @@ export const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLinkClick = (href: string) => {
-    setActiveLink(href);
+  const handleLinkClick = () => {
     setMobileOpen(false);
   };
 
@@ -58,35 +59,41 @@ export const Navbar = () => {
         
         <div className="w-px h-5 bg-white/15 mx-1" />
         
-        {navLinks.map((link) => (
-          <motion.a
-            key={link.href}
-            href={link.href}
-            onClick={() => handleLinkClick(link.href)}
-            className={cn(
-              "relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-full",
-              activeLink === link.href
-                ? "text-primary"
-                : "text-foreground/70 hover:text-foreground"
-            )}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {/* Active indicator - concentric shape */}
-            {activeLink === link.href && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute inset-0 rounded-full liquid-glass"
-                style={{
-                  background: 'linear-gradient(135deg, hsl(270 80% 65% / 0.15) 0%, hsl(270 80% 65% / 0.05) 100%)',
-                  border: '1px solid hsl(270 80% 65% / 0.25)'
-                }}
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
-            )}
-            <span className="relative z-10">{link.label}</span>
-          </motion.a>
-        ))}
+        {navLinks.map((link) => {
+          const isRoute = link.href.startsWith("/");
+          const isActive = isRoute ? activeLink === link.href : false;
+          const Wrapper = isRoute ? Link : "a";
+          const linkProps = isRoute ? { to: link.href } : { href: link.href };
+          
+          return (
+            <motion.div
+              key={link.href}
+              className={cn(
+                "relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-full cursor-pointer",
+                isActive
+                  ? "text-primary"
+                  : "text-foreground/70 hover:text-foreground"
+              )}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 rounded-full liquid-glass"
+                  style={{
+                    background: 'linear-gradient(135deg, hsl(270 80% 65% / 0.15) 0%, hsl(270 80% 65% / 0.05) 100%)',
+                    border: '1px solid hsl(270 80% 65% / 0.25)'
+                  }}
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <Wrapper {...linkProps as any} onClick={handleLinkClick} className="relative z-10">
+                {link.label}
+              </Wrapper>
+            </motion.div>
+          );
+        })}
         
         <div className="w-px h-5 bg-white/15 mx-1" />
         
@@ -132,24 +139,32 @@ export const Navbar = () => {
             className="lg:hidden fixed top-[5rem] left-4 right-4 z-50 rounded-[1.5rem] overflow-hidden liquid-glass-card"
           >
             <div className="flex flex-col p-4 gap-1">
-              {navLinks.map((link, index) => (
-                <motion.a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => handleLinkClick(link.href)}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={cn(
-                    "px-4 py-3 rounded-xl text-base font-medium transition-all duration-300",
-                    activeLink === link.href
-                      ? "text-primary bg-primary/10"
-                      : "text-foreground/70 hover:text-foreground hover:bg-white/5"
-                  )}
-                >
-                  {link.label}
-                </motion.a>
-              ))}
+              {navLinks.map((link, index) => {
+                const isRoute = link.href.startsWith("/");
+                const Wrapper = isRoute ? Link : "a";
+                const linkProps = isRoute ? { to: link.href } : { href: link.href };
+                return (
+                  <motion.div
+                    key={link.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <Wrapper
+                      {...linkProps as any}
+                      onClick={handleLinkClick}
+                      className={cn(
+                        "block px-4 py-3 rounded-xl text-base font-medium transition-all duration-300",
+                        activeLink === link.href
+                          ? "text-primary bg-primary/10"
+                          : "text-foreground/70 hover:text-foreground hover:bg-white/5"
+                      )}
+                    >
+                      {link.label}
+                    </Wrapper>
+                  </motion.div>
+                );
+              })}
               <div className="h-px bg-white/10 my-2" />
               <motion.a
                 href="/login"
