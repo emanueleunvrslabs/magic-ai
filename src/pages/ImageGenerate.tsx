@@ -12,34 +12,49 @@ import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, ImageIcon, Wand2, Upload, X } from "lucide-react";
 
-const IMAGE_SIZES = [
-  { label: "1:1", value: "square_hd" },
-  { label: "4:3", value: "landscape_4_3" },
-  { label: "3:4", value: "portrait_4_3" },
-  { label: "16:9", value: "landscape_16_9" },
-  { label: "9:16", value: "portrait_16_9" },
+const ASPECT_RATIOS = [
+  { label: "Auto", value: "auto" },
+  { label: "1:1", value: "1:1" },
+  { label: "21:9", value: "21:9" },
+  { label: "16:9", value: "16:9" },
+  { label: "3:2", value: "3:2" },
+  { label: "4:3", value: "4:3" },
+  { label: "5:4", value: "5:4" },
+  { label: "4:5", value: "4:5" },
+  { label: "3:4", value: "3:4" },
+  { label: "2:3", value: "2:3" },
+  { label: "9:16", value: "9:16" },
+];
+
+const RESOLUTIONS = [
+  { label: "1K", value: "1K" },
+  { label: "2K", value: "2K" },
+  { label: "4K", value: "4K" },
+];
+
+const OUTPUT_FORMATS = [
+  { label: "PNG", value: "png" },
+  { label: "JPEG", value: "jpeg" },
+  { label: "WebP", value: "webp" },
 ];
 
 const ImageGenerate = () => {
   const [activeTab, setActiveTab] = useState("generate");
-  
+
   // Text-to-image state
   const [prompt, setPrompt] = useState("");
-  const [negativePrompt, setNegativePrompt] = useState("");
-  const [imageSize, setImageSize] = useState("landscape_4_3");
+  const [aspectRatio, setAspectRatio] = useState("1:1");
+  const [resolution, setResolution] = useState("1K");
+  const [outputFormat, setOutputFormat] = useState("png");
   const [numImages, setNumImages] = useState(1);
-  const [guidanceScale, setGuidanceScale] = useState(5);
-  const [numSteps, setNumSteps] = useState(30);
-  
+
   // Edit state
   const [editPrompt, setEditPrompt] = useState("");
-  const [editImageUrl, setEditImageUrl] = useState("");
-  const [editImagePreview, setEditImagePreview] = useState("");
-  const [editStrength, setEditStrength] = useState(0.85);
-  const [editImageSize, setEditImageSize] = useState("landscape_4_3");
-  const [editGuidanceScale, setEditGuidanceScale] = useState(5);
-  const [editNumSteps, setEditNumSteps] = useState(30);
-  
+  const [editImages, setEditImages] = useState<Array<{ url: string; preview: string }>>([]);
+  const [editAspectRatio, setEditAspectRatio] = useState("auto");
+  const [editResolution, setEditResolution] = useState("1K");
+  const [editOutputFormat, setEditOutputFormat] = useState("png");
+
   // Common state
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Array<{ url: string }>>([]);
@@ -47,16 +62,23 @@ const ImageGenerate = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setEditImageUrl(dataUrl);
-      setEditImagePreview(dataUrl);
-    };
-    reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        setEditImages((prev) => [...prev, { url: dataUrl, preview: dataUrl }]);
+      };
+      reader.readAsDataURL(file);
+    });
+    // Reset input so the same file can be re-selected
+    e.target.value = "";
+  };
+
+  const removeEditImage = (index: number) => {
+    setEditImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleGenerate = async () => {
@@ -70,19 +92,17 @@ const ImageGenerate = () => {
         body: {
           mode: "generate",
           prompt,
-          negative_prompt: negativePrompt || undefined,
-          image_size: imageSize,
           num_images: numImages,
-          guidance_scale: guidanceScale,
-          num_inference_steps: numSteps,
-          output_format: "png",
-          enable_safety_checker: false,
+          aspect_ratio: aspectRatio,
+          output_format: outputFormat,
+          resolution,
+          safety_tolerance: "6",
         },
       });
 
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
-      
+
       setResults(data?.images || []);
     } catch (err: any) {
       setError(err.message || "Generation failed");
@@ -92,7 +112,7 @@ const ImageGenerate = () => {
   };
 
   const handleEdit = async () => {
-    if (!editPrompt.trim() || !editImageUrl) return;
+    if (!editPrompt.trim() || editImages.length === 0) return;
     setLoading(true);
     setError("");
     setResults([]);
@@ -102,19 +122,17 @@ const ImageGenerate = () => {
         body: {
           mode: "edit",
           prompt: editPrompt,
-          image_url: editImageUrl,
-          strength: editStrength,
-          image_size: editImageSize,
-          guidance_scale: editGuidanceScale,
-          num_inference_steps: editNumSteps,
-          output_format: "png",
-          enable_safety_checker: false,
+          image_urls: editImages.map((img) => img.url),
+          aspect_ratio: editAspectRatio,
+          output_format: editOutputFormat,
+          resolution: editResolution,
+          safety_tolerance: "6",
         },
       });
 
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
-      
+
       setResults(data?.images || []);
     } catch (err: any) {
       setError(err.message || "Edit failed");
@@ -126,7 +144,7 @@ const ImageGenerate = () => {
   const downloadImage = (url: string, index: number) => {
     const a = document.createElement("a");
     a.href = url;
-    a.download = `magic-ai-${Date.now()}-${index}.png`;
+    a.download = `magic-ai-${Date.now()}-${index}.${outputFormat}`;
     a.target = "_blank";
     a.click();
   };
@@ -197,52 +215,43 @@ const ImageGenerate = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Negative Prompt</Label>
-                          <Textarea
-                            value={negativePrompt}
-                            onChange={(e) => setNegativePrompt(e.target.value)}
-                            placeholder="What to avoid..."
-                            className="min-h-[60px] bg-input/50 border-border/50 rounded-xl resize-none focus:border-primary"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Image Size</Label>
-                          <Select value={imageSize} onValueChange={setImageSize}>
+                          <Label className="text-foreground/90 font-medium">Aspect Ratio</Label>
+                          <Select value={aspectRatio} onValueChange={setAspectRatio}>
                             <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {IMAGE_SIZES.map((s) => (
-                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                              {ASPECT_RATIOS.map((ar) => (
+                                <SelectItem key={ar.value} value={ar.value}>{ar.label}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">
-                            Guidance Scale: {guidanceScale}
-                          </Label>
-                          <Slider
-                            value={[guidanceScale]}
-                            onValueChange={([v]) => setGuidanceScale(v)}
-                            min={1}
-                            max={20}
-                            step={0.5}
-                            className="py-2"
-                          />
+                          <Label className="text-foreground/90 font-medium">Resolution</Label>
+                          <Select value={resolution} onValueChange={setResolution}>
+                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {RESOLUTIONS.map((r) => (
+                                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">
-                            Steps: {numSteps}
-                          </Label>
-                          <Slider
-                            value={[numSteps]}
-                            onValueChange={([v]) => setNumSteps(v)}
-                            min={10}
-                            max={50}
-                            step={1}
-                            className="py-2"
-                          />
+                          <Label className="text-foreground/90 font-medium">Output Format</Label>
+                          <Select value={outputFormat} onValueChange={setOutputFormat}>
+                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {OUTPUT_FORMATS.map((f) => (
+                                <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
                           <Label className="text-foreground/90 font-medium">
@@ -277,7 +286,6 @@ const ImageGenerate = () => {
                       </div>
                     </div>
 
-                    {/* Results */}
                     <div className="lg:col-span-2">
                       <ResultsArea results={results} loading={loading} error={error} onDownload={downloadImage} />
                     </div>
@@ -290,45 +298,43 @@ const ImageGenerate = () => {
                     <div className="lg:col-span-1 space-y-5">
                       <div className="liquid-glass-card-sm p-6 space-y-5">
                         <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Source Image</Label>
+                          <Label className="text-foreground/90 font-medium">Source Images</Label>
                           <input
                             ref={fileInputRef}
                             type="file"
                             accept="image/*"
+                            multiple
                             onChange={handleFileUpload}
                             className="hidden"
                           />
-                          {editImagePreview ? (
-                            <div className="relative group">
-                              <img
-                                src={editImagePreview}
-                                alt="Source"
-                                className="w-full rounded-xl border border-border/50 object-cover max-h-48"
-                              />
-                              <button
-                                onClick={() => { setEditImageUrl(""); setEditImagePreview(""); }}
-                                className="absolute top-2 right-2 p-1.5 rounded-full bg-destructive/80 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
+                          {editImages.length > 0 && (
+                            <div className="grid grid-cols-2 gap-2">
+                              {editImages.map((img, i) => (
+                                <div key={i} className="relative group">
+                                  <img
+                                    src={img.preview}
+                                    alt={`Source ${i + 1}`}
+                                    className="w-full rounded-lg border border-border/50 object-cover h-24"
+                                  />
+                                  <button
+                                    onClick={() => removeEditImage(i)}
+                                    className="absolute top-1 right-1 p-1 rounded-full bg-destructive/80 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))}
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => fileInputRef.current?.click()}
-                              className="w-full h-32 rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
-                            >
-                              <Upload className="w-6 h-6" />
-                              <span className="text-sm">Upload image</span>
-                            </button>
                           )}
-                          <div className="flex gap-2">
-                            <Input
-                              value={editImageUrl.startsWith("data:") ? "" : editImageUrl}
-                              onChange={(e) => { setEditImageUrl(e.target.value); setEditImagePreview(e.target.value); }}
-                              placeholder="Or paste image URL..."
-                              className="bg-input/50 border-border/50 rounded-xl"
-                            />
-                          </div>
+                          <button
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full h-24 rounded-xl border-2 border-dashed border-border/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                          >
+                            <Upload className="w-5 h-5" />
+                            <span className="text-sm">
+                              {editImages.length > 0 ? "Add more images" : "Upload images"}
+                            </span>
+                          </button>
                         </div>
                         <div className="space-y-2">
                           <Label className="text-foreground/90 font-medium">Edit Prompt</Label>
@@ -340,63 +346,47 @@ const ImageGenerate = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">
-                            Strength: {editStrength.toFixed(2)}
-                          </Label>
-                          <Slider
-                            value={[editStrength]}
-                            onValueChange={([v]) => setEditStrength(v)}
-                            min={0.1}
-                            max={1}
-                            step={0.05}
-                            className="py-2"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            Higher = more creative, lower = closer to original
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">Output Size</Label>
-                          <Select value={editImageSize} onValueChange={setEditImageSize}>
+                          <Label className="text-foreground/90 font-medium">Aspect Ratio</Label>
+                          <Select value={editAspectRatio} onValueChange={setEditAspectRatio}>
                             <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {IMAGE_SIZES.map((s) => (
-                                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                              {ASPECT_RATIOS.map((ar) => (
+                                <SelectItem key={ar.value} value={ar.value}>{ar.label}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">
-                            Guidance Scale: {editGuidanceScale}
-                          </Label>
-                          <Slider
-                            value={[editGuidanceScale]}
-                            onValueChange={([v]) => setEditGuidanceScale(v)}
-                            min={1}
-                            max={20}
-                            step={0.5}
-                            className="py-2"
-                          />
+                          <Label className="text-foreground/90 font-medium">Resolution</Label>
+                          <Select value={editResolution} onValueChange={setEditResolution}>
+                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {RESOLUTIONS.map((r) => (
+                                <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-foreground/90 font-medium">
-                            Steps: {editNumSteps}
-                          </Label>
-                          <Slider
-                            value={[editNumSteps]}
-                            onValueChange={([v]) => setEditNumSteps(v)}
-                            min={10}
-                            max={50}
-                            step={1}
-                            className="py-2"
-                          />
+                          <Label className="text-foreground/90 font-medium">Output Format</Label>
+                          <Select value={editOutputFormat} onValueChange={setEditOutputFormat}>
+                            <SelectTrigger className="bg-input/50 border-border/50 rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {OUTPUT_FORMATS.map((f) => (
+                                <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <Button
                           onClick={handleEdit}
-                          disabled={loading || !editPrompt.trim() || !editImageUrl}
+                          disabled={loading || !editPrompt.trim() || editImages.length === 0}
                           className="w-full btn-premium rounded-xl h-12 text-base"
                         >
                           {loading ? (
@@ -414,7 +404,6 @@ const ImageGenerate = () => {
                       </div>
                     </div>
 
-                    {/* Results */}
                     <div className="lg:col-span-2">
                       <ResultsArea results={results} loading={loading} error={error} onDownload={downloadImage} />
                     </div>
