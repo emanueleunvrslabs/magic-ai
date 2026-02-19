@@ -322,7 +322,10 @@ const ImageGenerate = () => {
                     </div>
 
                     {/* Gallery */}
-                    <ResultsArea results={results} loading={loading} error={error} onDownload={downloadImage} />
+                    <div className="mt-4">
+                      <h3 className="text-sm font-medium text-foreground/60 mb-3 tracking-wide uppercase">Gallery</h3>
+                      <ResultsArea results={results} loading={false} error={error} onDownload={downloadImage} />
+                    </div>
                   </div>
                 </TabsContent>
 
