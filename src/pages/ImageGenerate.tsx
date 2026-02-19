@@ -10,7 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, ImageIcon, Wand2, Upload, X } from "lucide-react";
+import { Loader2, Download, ImageIcon, Wand2, Upload, X, Share2, Expand, Video } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 const ASPECT_RATIOS = [
@@ -440,51 +441,124 @@ const ResultsArea = ({
   loading: boolean;
   error: string;
   onDownload: (url: string, i: number) => void;
-}) => (
-  <div className="min-h-[200px]">
-    {loading ? (
-      <div className="flex flex-col items-center gap-4 text-muted-foreground py-16">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-        <p className="text-sm">Generating your image...</p>
+}) => {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const handleDirectDownload = async (url: string, index: number) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `magic-ai-${Date.now()}-${index}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback
+      onDownload(url, index);
+    }
+  };
+
+  const handleShare = async (url: string) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "AI Generated Image", url });
+      } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url);
+    }
+  };
+
+  return (
+    <>
+      <div className="min-h-[200px]">
+        {loading ? (
+          <div className="flex flex-col items-center gap-4 text-muted-foreground py-16">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-sm">Generating your image...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center text-destructive py-16">
+            <p className="font-medium">Error</p>
+            <p className="text-sm mt-1 text-destructive/80">{error}</p>
+          </div>
+        ) : results.length > 0 ? (
+          <div className="liquid-glass-card-sm p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <AnimatePresence>
+              {results.map((img, i) => (
+                <motion.div
+                  key={img.url}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="relative group aspect-square"
+                >
+                  <img
+                    src={img.url}
+                    alt={`Generated ${i + 1}`}
+                    className="w-full h-full rounded-xl border border-border/30 shadow-md object-cover"
+                  />
+                  {/* Overlay actions */}
+                  <div className="absolute inset-0 rounded-xl bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleDirectDownload(img.url, i)}
+                        className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                        title="Download"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleShare(img.url)}
+                        className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                        title="Share"
+                      >
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setPreviewUrl(img.url)}
+                        className="p-2 rounded-full liquid-glass text-foreground hover:text-primary transition-colors"
+                        title="Preview"
+                      >
+                        <Expand className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <button
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full liquid-glass text-xs font-medium text-foreground hover:text-primary transition-colors"
+                    >
+                      <Video className="w-3.5 h-3.5" />
+                      Generate Video
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-3 text-muted-foreground py-16">
+            <ImageIcon className="w-12 h-12 opacity-30" />
+            <p className="text-sm">Your generated images will appear here</p>
+          </div>
+        )}
       </div>
-    ) : error ? (
-      <div className="text-center text-destructive py-16">
-        <p className="font-medium">Error</p>
-        <p className="text-sm mt-1 text-destructive/80">{error}</p>
-      </div>
-    ) : results.length > 0 ? (
-      <div className="liquid-glass-card-sm p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        <AnimatePresence>
-          {results.map((img, i) => (
-            <motion.div
-              key={img.url}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              className="relative group aspect-square"
-            >
-              <img
-                src={img.url}
-                alt={`Generated ${i + 1}`}
-                className="w-full h-full rounded-xl border border-border/30 shadow-md object-cover"
-              />
-              <button
-                onClick={() => onDownload(img.url, i)}
-                className="absolute bottom-2 right-2 p-2 rounded-full liquid-glass opacity-0 group-hover:opacity-100 transition-opacity text-foreground hover:text-primary"
-              >
-                <Download className="w-4 h-4" />
-              </button>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
-    ) : (
-      <div className="flex flex-col items-center gap-3 text-muted-foreground py-16">
-        <ImageIcon className="w-12 h-12 opacity-30" />
-        <p className="text-sm">Your generated images will appear here</p>
-      </div>
-    )}
-  </div>
-);
+
+      {/* Lightbox preview */}
+      <Dialog open={!!previewUrl} onOpenChange={() => setPreviewUrl(null)}>
+        <DialogContent className="max-w-4xl w-full p-2 bg-background/95 backdrop-blur-xl border-border/30">
+          {previewUrl && (
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
 
 export default ImageGenerate;
