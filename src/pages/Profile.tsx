@@ -351,7 +351,7 @@ const Profile = () => {
         <Navbar />
 
         <main className="flex-1 pt-28 pb-16 px-4">
-          <div className="max-w-lg mx-auto space-y-6">
+          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               {/* Profile Header */}
               <div className="liquid-glass-card p-8 rounded-2xl space-y-6">
