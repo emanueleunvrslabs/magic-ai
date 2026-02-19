@@ -175,14 +175,13 @@ const Profile = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <Button
+                    <button
                       onClick={handleStartChange}
-                      variant="outline"
-                      className="w-full rounded-xl h-11 border-border/50 hover:bg-primary/5 hover:border-primary/30 transition-all"
+                      className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5 mx-auto"
                     >
-                      <RefreshCw className="w-4 h-4 mr-2" />
+                      <RefreshCw className="w-3 h-3" />
                       Change Number
-                    </Button>
+                    </button>
                   </motion.div>
                 )}
 
@@ -387,7 +386,7 @@ const Profile = () => {
                 onClick={handleLogout}
                 disabled={loggingOut}
                 variant="outline"
-                className="w-full rounded-xl h-11 border-border/50 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all"
+                className="w-full rounded-xl h-11 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 hover:border-destructive/50 transition-all"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 {loggingOut ? "Logging out..." : "Logout"}
