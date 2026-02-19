@@ -24,8 +24,8 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/image" element={<RequireAuth><ImageGenerate /></RequireAuth>} />
-              <Route path="/video" element={<RequireAuth><VideoGenerate /></RequireAuth>} />
+              <Route path="/image" element={<ImageGenerate />} />
+              <Route path="/video" element={<VideoGenerate />} />
               <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
