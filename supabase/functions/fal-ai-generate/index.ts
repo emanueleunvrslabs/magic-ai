@@ -22,7 +22,6 @@ serve(async (req) => {
     const body = await req.json();
     const { mode, ...params } = body;
 
-    // Determine endpoint based on mode
     const endpoint = mode === 'edit'
       ? 'https://queue.fal.run/fal-ai/nano-banana-pro/edit'
       : 'https://queue.fal.run/fal-ai/nano-banana-pro';
@@ -39,30 +38,31 @@ serve(async (req) => {
 
     if (!submitRes.ok) {
       const err = await submitRes.text();
+      console.error('fal.ai submit error:', submitRes.status, err);
       return new Response(JSON.stringify({ error: `fal.ai error: ${err}` }), {
         status: submitRes.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { request_id, status: queueStatus } = await submitRes.json();
+    const { request_id } = await submitRes.json();
 
     // Poll for result
-    const resultUrl = mode === 'edit'
+    const baseUrl = mode === 'edit'
       ? `https://queue.fal.run/fal-ai/nano-banana-pro/edit/requests/${request_id}`
       : `https://queue.fal.run/fal-ai/nano-banana-pro/requests/${request_id}`;
 
     let attempts = 0;
-    const maxAttempts = 60; // 60 seconds max
+    const maxAttempts = 120;
 
     while (attempts < maxAttempts) {
-      const statusRes = await fetch(`${resultUrl}/status`, {
+      const statusRes = await fetch(`${baseUrl}/status`, {
         headers: { 'Authorization': `Key ${FAL_KEY}` },
       });
       const statusData = await statusRes.json();
 
       if (statusData.status === 'COMPLETED') {
-        const resultRes = await fetch(resultUrl, {
+        const resultRes = await fetch(baseUrl, {
           headers: { 'Authorization': `Key ${FAL_KEY}` },
         });
         const result = await resultRes.json();
@@ -72,6 +72,7 @@ serve(async (req) => {
       }
 
       if (statusData.status === 'FAILED') {
+        console.error('fal.ai generation failed:', JSON.stringify(statusData));
         return new Response(JSON.stringify({ error: 'Generation failed', details: statusData }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -88,6 +89,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
+    console.error('Edge function error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
