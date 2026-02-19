@@ -26,15 +26,21 @@ serve(async (req) => {
 
     const { phone } = await req.json();
 
-    if (!phone || typeof phone !== 'string' || phone.length < 8 || phone.length > 20) {
+    if (!phone || typeof phone !== 'string') {
       return new Response(JSON.stringify({ error: 'Invalid phone number' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Clean phone number (keep only digits)
+    // Clean and validate phone in E.164-like format (digits only, 8-15 digits)
     const cleanPhone = phone.replace(/[^\d]/g, '');
+    if (cleanPhone.length < 8 || cleanPhone.length > 15) {
+      return new Response(JSON.stringify({ error: 'Invalid phone number format' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Rate limiting: max 3 OTP requests per phone per 5 minutes
     const { data: recentOtps } = await supabase
@@ -101,7 +107,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('send-otp error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
