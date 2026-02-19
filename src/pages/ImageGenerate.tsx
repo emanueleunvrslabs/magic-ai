@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/landing/Footer";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, ImageIcon, Wand2, Upload, X, Share2, Expand, Video } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ASPECT_RATIOS = [
   { label: "Auto", value: "auto" },
@@ -41,6 +42,7 @@ const OUTPUT_FORMATS = [
 ];
 
 const ImageGenerate = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("generate");
 
   // Text-to-image state
@@ -62,6 +64,33 @@ const ImageGenerate = () => {
   const [results, setResults] = useState<Array<{ url: string }>>([]);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Load saved images on mount
+  useEffect(() => {
+    if (!user) return;
+    const loadSaved = async () => {
+      const { data } = await supabase
+        .from("generated_media")
+        .select("url")
+        .eq("user_id", user.id)
+        .eq("media_type", "image")
+        .order("created_at", { ascending: false });
+      if (data?.length) {
+        setResults(data.map((r) => ({ url: r.url })));
+      }
+    };
+    loadSaved();
+  }, [user]);
+
+  const saveMedia = async (urls: string[]) => {
+    if (!user) return;
+    const rows = urls.map((url) => ({
+      user_id: user.id,
+      media_type: "image" as const,
+      url,
+    }));
+    await supabase.from("generated_media").insert(rows);
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -104,7 +133,9 @@ const ImageGenerate = () => {
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
 
-      setResults(prev => [...(data?.images || []), ...prev]);
+      const newImages = data?.images || [];
+      setResults(prev => [...newImages, ...prev]);
+      await saveMedia(newImages.map((img: { url: string }) => img.url));
     } catch (err: any) {
       setError(err.message || "Generation failed");
     } finally {
@@ -133,7 +164,9 @@ const ImageGenerate = () => {
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
 
-      setResults(prev => [...(data?.images || []), ...prev]);
+      const newImages = data?.images || [];
+      setResults(prev => [...newImages, ...prev]);
+      await saveMedia(newImages.map((img: { url: string }) => img.url));
     } catch (err: any) {
       setError(err.message || "Edit failed");
     } finally {

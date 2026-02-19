@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      generated_media: {
+        Row: {
+          created_at: string
+          id: string
+          media_type: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_type: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_type?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       phone_otps: {
         Row: {
           created_at: string
