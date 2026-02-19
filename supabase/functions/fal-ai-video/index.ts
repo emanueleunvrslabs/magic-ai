@@ -13,6 +13,16 @@ const MODE_ENDPOINTS: Record<string, string> = {
   'reference-to-video': 'fal-ai/veo3.1/reference-to-video',
 };
 
+async function safeJson(res: Response): Promise<any> {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    console.error('Failed to parse JSON, raw response:', text.substring(0, 500));
+    throw new Error(`Non-JSON response (status ${res.status}): ${text.substring(0, 200)}`);
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -59,24 +69,33 @@ serve(async (req) => {
       });
     }
 
-    const { request_id } = await submitRes.json();
+    const submitData = await safeJson(submitRes);
+    const request_id = submitData.request_id;
 
-    // Poll for result (video generation can take longer)
+    if (!request_id) {
+      console.error('No request_id in submit response:', JSON.stringify(submitData));
+      return new Response(JSON.stringify({ error: 'No request_id returned from fal.ai', details: submitData }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Poll for result
     const baseUrl = `https://queue.fal.run/${endpointId}/requests/${request_id}`;
     let attempts = 0;
-    const maxAttempts = 300; // 5 minutes max
+    const maxAttempts = 300;
 
     while (attempts < maxAttempts) {
       const statusRes = await fetch(`${baseUrl}/status`, {
         headers: { 'Authorization': `Key ${FAL_KEY}` },
       });
-      const statusData = await statusRes.json();
+      const statusData = await safeJson(statusRes);
 
       if (statusData.status === 'COMPLETED') {
         const resultRes = await fetch(baseUrl, {
           headers: { 'Authorization': `Key ${FAL_KEY}` },
         });
-        const result = await resultRes.json();
+        const result = await safeJson(resultRes);
         return new Response(JSON.stringify(result), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
