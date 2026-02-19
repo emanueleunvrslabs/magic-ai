@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Video, Upload, X, Film, ImageIcon, Layers, Play, ArrowRight, Download, Share2, Expand } from "lucide-react";
+import { Loader2, Video, Upload, X, Film, ImageIcon, Layers, Play, ArrowRight, Download, Share2, Expand, Trash2 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useGeneration } from "@/contexts/GenerationContext";
@@ -79,7 +79,7 @@ const MODE_CONFIG: Record<string, {
 
 const VideoGenerate = () => {
   const location = useLocation();
-  const { videoResults, videoJobs, generateVideo } = useGeneration();
+  const { videoResults, videoJobs, generateVideo, deleteMedia } = useGeneration();
   const [activeMode, setActiveMode] = useState("text-to-video");
   const [model, setModel] = useState("veo-3.1-fast");
   const [prompt, setPrompt] = useState("");
@@ -516,7 +516,7 @@ const VideoGenerate = () => {
                 </div>
 
                 {/* Results */}
-                <VideoResultsArea results={videoResults} loading={loading} error={error} />
+                <VideoResultsArea results={videoResults} loading={loading} error={error} onDelete={(url) => deleteMedia(url, "video")} />
               </div>
             </motion.div>
           </div>
@@ -533,10 +533,12 @@ const VideoResultsArea = ({
   results,
   loading,
   error,
+  onDelete,
 }: {
   results: Array<{ url: string }>;
   loading: boolean;
   error: string;
+  onDelete?: (url: string) => void;
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -641,6 +643,13 @@ const VideoResultsArea = ({
                         <Expand className="w-4 h-4" />
                       </button>
                     </div>
+                    <button
+                      onClick={() => onDelete?.(vid.url)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full liquid-glass text-xs font-medium text-foreground hover:text-destructive transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
                   </div>
                 </motion.div>
               ))}
