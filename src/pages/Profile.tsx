@@ -111,18 +111,15 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      <div
-        className="fixed inset-0 z-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 0%, hsl(270 60% 15% / 0.4) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, hsl(270 80% 20% / 0.2) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, hsl(270 60% 15% / 0.15) 0%, transparent 50%)",
-        }}
-      />
+    <div className="relative min-h-screen bg-background overflow-x-hidden">
+      <div className="fixed inset-0 mesh-gradient" />
+      <div className="fixed inset-0 aurora-bg pointer-events-none" />
+      <div className="grain-overlay" />
 
-      <Navbar />
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Navbar />
 
-      <main className="relative z-10 pt-32 pb-20 px-4">
+        <main className="flex-1 pt-28 pb-16 px-4">
         <div className="max-w-lg mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -340,7 +337,8 @@ const Profile = () => {
         </div>
       </main>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 };
