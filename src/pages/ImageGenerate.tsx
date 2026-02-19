@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, Download, ImageIcon, Wand2, Upload, X, Share2, Expand, Video } from "lucide-react";
+import { Loader2, Download, ImageIcon, Wand2, Upload, X, Share2, Expand, Video, Trash2 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useGeneration } from "@/contexts/GenerationContext";
@@ -43,7 +43,7 @@ const OUTPUT_FORMATS = [
 
 const ImageGenerate = () => {
   const navigate = useNavigate();
-  const { imageResults, imageJobs, generateImages } = useGeneration();
+  const { imageResults, imageJobs, generateImages, deleteMedia } = useGeneration();
   const [activeTab, setActiveTab] = useState("generate");
 
   // Text-to-image state
@@ -270,7 +270,7 @@ const ImageGenerate = () => {
                     </div>
 
                     {/* Results */}
-                    <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} onGenerateVideo={(url) => navigate("/video", { state: { imageUrl: url } })} />
+                    <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} onGenerateVideo={(url) => navigate("/video", { state: { imageUrl: url } })} onDelete={(url) => deleteMedia(url, "image")} />
                   </div>
                 </TabsContent>
 
@@ -387,7 +387,7 @@ const ImageGenerate = () => {
                     </div>
 
                     <div className="lg:col-span-2">
-                      <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} onGenerateVideo={(url) => navigate("/video", { state: { imageUrl: url } })} />
+                      <ResultsArea results={imageResults} loading={loading} error={error} onDownload={downloadImage} onGenerateVideo={(url) => navigate("/video", { state: { imageUrl: url } })} onDelete={(url) => deleteMedia(url, "image")} />
                     </div>
                   </div>
                 </TabsContent>
@@ -408,12 +408,14 @@ const ResultsArea = ({
   error,
   onDownload,
   onGenerateVideo,
+  onDelete,
 }: {
   results: Array<{ url: string }>;
   loading: boolean;
   error: string;
   onDownload: (url: string, i: number) => void;
   onGenerateVideo?: (url: string) => void;
+  onDelete?: (url: string) => void;
 }) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -519,6 +521,13 @@ const ResultsArea = ({
                     >
                       <Video className="w-3.5 h-3.5" />
                       Generate Video
+                    </button>
+                    <button
+                      onClick={() => onDelete?.(img.url)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full liquid-glass text-xs font-medium text-foreground hover:text-destructive transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
                     </button>
                   </div>
                 </motion.div>

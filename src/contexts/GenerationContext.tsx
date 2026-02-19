@@ -16,6 +16,7 @@ interface GenerationContextType {
   videoJobs: GenerationJob[];
   generateImages: (params: Record<string, unknown>) => void;
   generateVideo: (params: Record<string, unknown>) => void;
+  deleteMedia: (url: string, type: "image" | "video") => Promise<void>;
 }
 
 const GenerationContext = createContext<GenerationContextType>({
@@ -25,6 +26,7 @@ const GenerationContext = createContext<GenerationContextType>({
   videoJobs: [],
   generateImages: () => {},
   generateVideo: () => {},
+  deleteMedia: async () => {},
 });
 
 export const useGeneration = () => useContext(GenerationContext);
@@ -139,9 +141,29 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
     [saveMedia]
   );
 
+  const deleteMedia = useCallback(
+    async (url: string, type: "image" | "video") => {
+      // Remove from state immediately
+      if (type === "image") {
+        setImageResults((prev) => prev.filter((item) => item.url !== url));
+      } else {
+        setVideoResults((prev) => prev.filter((item) => item.url !== url));
+      }
+      // Remove from DB
+      if (user) {
+        await supabase
+          .from("generated_media")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("url", url);
+      }
+    },
+    [user]
+  );
+
   return (
     <GenerationContext.Provider
-      value={{ imageResults, videoResults, imageJobs, videoJobs, generateImages, generateVideo }}
+      value={{ imageResults, videoResults, imageJobs, videoJobs, generateImages, generateVideo, deleteMedia }}
     >
       {children}
     </GenerationContext.Provider>
