@@ -323,13 +323,13 @@ const VideoGenerate = () => {
             >
               <div className="flex justify-center mb-8">
                 <div
-                  className="liquid-glass-nav rounded-full p-1.5 flex items-center gap-1 flex-wrap justify-center"
+                  className="liquid-glass-nav rounded-full p-1.5 inline-flex items-center gap-1 justify-center"
                   style={{
                     boxShadow: '0 4px 24px hsl(0 0% 0% / 0.15), inset 0 1px 0 0 hsl(0 0% 100% / 0.08)',
                   }}
                 >
                   <Select value={model} onValueChange={handleModelChange}>
-                    <SelectTrigger className="px-4 py-2 text-sm font-medium rounded-full border-none min-w-[130px] bg-transparent text-foreground/70 hover:text-foreground transition-all duration-300 focus:ring-0 focus:ring-offset-0 data-[state=open]:text-primary [&>span]:text-inherit">
+                    <SelectTrigger className="px-4 py-2 text-sm font-medium rounded-full border-none w-auto bg-transparent text-foreground/70 hover:text-foreground transition-all duration-300 focus:ring-0 focus:ring-offset-0 data-[state=open]:text-primary [&>span]:text-inherit h-auto gap-1.5">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border z-50 rounded-xl">
