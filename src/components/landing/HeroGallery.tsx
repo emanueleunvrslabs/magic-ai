@@ -17,29 +17,45 @@ const galleryItems = [
   { src: vid3, label: "Veo 3.1", type: "video" as const },
 ];
 
-function useLiveCounter(base: number) {
-  const [count, setCount] = useState(base);
-  const countRef = useRef(base);
+/** Returns a base value between 5000-20000 based on time of day (simulated daily curve) */
+function getDayBase() {
+  const hour = new Date().getHours();
+  // Curve: peak ~18k at 14-18h, low ~6k at 3-5h
+  const curve: Record<number, number> = {
+    0: 8500, 1: 7500, 2: 6500, 3: 5800, 4: 5500, 5: 5800,
+    6: 6500, 7: 8000, 8: 10000, 9: 12000, 10: 14000, 11: 15500,
+    12: 16500, 13: 17500, 14: 18500, 15: 19000, 16: 19500, 17: 19000,
+    18: 18000, 19: 17000, 20: 15500, 21: 14000, 22: 12000, 23: 10000,
+  };
+  const now = curve[hour] ?? 12000;
+  const next = curve[(hour + 1) % 24] ?? 12000;
+  const min = new Date().getMinutes();
+  // Interpolate between current and next hour
+  return Math.round(now + (next - now) * (min / 60));
+}
+
+function useLiveCounter() {
+  const [count, setCount] = useState(() => getDayBase());
+  const countRef = useRef(count);
 
   useEffect(() => {
     const tick = () => {
-      // ~45% chance decrease, ~55% chance increase for natural fluctuation
-      const r = Math.random();
-      const delta = r < 0.45
-        ? -Math.ceil(Math.random() * 5)   // decrease 1-5
-        : Math.ceil(Math.random() * 4);    // increase 1-4
-      countRef.current = Math.max(base - 300, Math.min(base + 300, countRef.current + delta));
+      const target = getDayBase();
+      // Drift toward the target + small random fluctuation
+      const drift = Math.sign(target - countRef.current) * Math.ceil(Math.random() * 8);
+      const jitter = Math.round((Math.random() - 0.5) * 10);
+      countRef.current = Math.max(5000, Math.min(20000, countRef.current + drift + jitter));
       setCount(countRef.current);
     };
     const id = setInterval(tick, 1500 + Math.random() * 2500);
     return () => clearInterval(id);
-  }, [base]);
+  }, []);
 
   return count;
 }
 
 export const HeroGallery = () => {
-  const liveUsers = useLiveCounter(18699);
+  const liveUsers = useLiveCounter();
 
   return (
     <section className="relative pt-32 pb-20 px-4">
