@@ -453,7 +453,7 @@ const ResultsArea = ({
         <p className="text-sm mt-1 text-destructive/80">{error}</p>
       </div>
     ) : results.length > 0 ? (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+      <div className="liquid-glass-card-sm p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         <AnimatePresence>
           {results.map((img, i) => (
             <motion.div
