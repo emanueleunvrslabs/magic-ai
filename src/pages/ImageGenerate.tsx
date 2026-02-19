@@ -444,13 +444,7 @@ const ResultsArea = ({
 
   const handleShare = async (url: string) => {
     try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const file = new File([blob], `magic-ai-${Date.now()}.jpg`, { type: blob.type });
-
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: "AI Generated Image" });
-      } else if (navigator.share) {
+      if (navigator.share) {
         await navigator.share({ title: "AI Generated Image", url });
       } else {
         await navigator.clipboard.writeText(url);
