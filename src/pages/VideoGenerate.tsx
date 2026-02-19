@@ -577,15 +577,22 @@ const VideoResultsArea = ({
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
-                  className="relative group aspect-video"
+                  className="relative group aspect-video cursor-pointer"
+                  onClick={() => setPreviewUrl(vid.url)}
                 >
                   <video
                     src={vid.url}
-                    className="w-full h-full rounded-xl object-cover"
-                    controls
+                    className="w-full h-full rounded-xl object-cover pointer-events-none"
+                    muted
                     loop
                     playsInline
                   />
+                  {/* Play overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="p-3 rounded-full liquid-glass">
+                      <Play className="w-6 h-6 text-foreground" />
+                    </div>
+                  </div>
                   {/* Action bar */}
                   <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
