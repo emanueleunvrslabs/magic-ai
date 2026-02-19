@@ -352,7 +352,7 @@ const Profile = () => {
 
         <main className="flex-1 pt-28 pb-16 px-4">
           <div className="max-w-3xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="flex">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="flex order-2 lg:order-1">
               {/* Profile Header */}
               <div className="liquid-glass-card p-8 rounded-2xl space-y-6 flex flex-col w-full">
                 <div className="flex flex-col items-center text-center space-y-4">
@@ -453,7 +453,7 @@ const Profile = () => {
 
 
             {/* Integrations Section */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="flex">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="flex order-1 lg:order-2">
               <div className="liquid-glass-card p-6 rounded-2xl space-y-4 flex flex-col w-full">
                 <div className="flex items-center gap-2">
                   <Plug className="w-4 h-4 text-primary" />
