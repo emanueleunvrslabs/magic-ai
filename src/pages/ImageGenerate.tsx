@@ -480,7 +480,7 @@ const ResultsArea = ({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
-              className={cn("relative group", results.length === 1 && "max-w-sm")}
+              className="relative group"
             >
               <img
                 src={img.url}
