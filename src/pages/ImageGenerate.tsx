@@ -161,19 +161,6 @@ const ImageGenerate = () => {
 
         <main className="flex-1 pt-28 pb-16 px-4">
           <div className="max-w-5xl mx-auto">
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-10"
-            >
-              <h1 className="text-4xl md:text-5xl font-bold mb-3">
-                <span className="gradient-text">Image Generation</span>
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Powered by Nano Banana Pro — fast, high-quality AI images
-              </p>
-            </motion.div>
 
             {/* Tabs */}
             <motion.div
