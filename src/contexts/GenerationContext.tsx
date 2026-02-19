@@ -35,16 +35,16 @@ export const useGeneration = () => useContext(GenerationContext);
 
 let jobCounter = 0;
 
-/** Fetch the user's own fal API key if they have one */
-async function getUserFalKey(userId: string): Promise<string | null> {
+/** Check if user has a valid fal API key (without fetching the key itself) */
+async function userHasFalKey(userId: string): Promise<boolean> {
   const { data } = await supabase
     .from("user_api_keys")
-    .select("api_key")
+    .select("is_valid")
     .eq("user_id", userId)
     .eq("provider", "fal")
     .eq("is_valid", true)
     .limit(1);
-  return data && data.length > 0 ? data[0].api_key : null;
+  return data != null && data.length > 0;
 }
 
 export const GenerationProvider = ({ children }: { children: ReactNode }) => {
@@ -99,11 +99,11 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
 
       (async () => {
         try {
-          // Check if user has own API key
-          const userKey = user ? await getUserFalKey(user.id) : null;
-          const bodyWithKey = userKey ? { ...params, userApiKey: userKey } : params;
+          // Tell edge function to use stored key server-side (key never sent to client)
+          const hasOwnKey = user ? await userHasFalKey(user.id) : false;
+          const body = hasOwnKey ? { ...params, useStoredKey: true } : params;
 
-          const { data, error } = await supabase.functions.invoke("fal-ai-generate", { body: bodyWithKey });
+          const { data, error } = await supabase.functions.invoke("fal-ai-generate", { body });
           console.log("fal-ai-generate response:", JSON.stringify(data));
           if (error) throw new Error(error.message);
           if (data?.error) throw new Error(data.error);
@@ -137,10 +137,10 @@ export const GenerationProvider = ({ children }: { children: ReactNode }) => {
 
       (async () => {
         try {
-          const userKey = user ? await getUserFalKey(user.id) : null;
-          const bodyWithKey = userKey ? { ...params, userApiKey: userKey } : params;
+          const hasOwnKey = user ? await userHasFalKey(user.id) : false;
+          const body = hasOwnKey ? { ...params, useStoredKey: true } : params;
 
-          const { data, error } = await supabase.functions.invoke("fal-ai-video", { body: bodyWithKey });
+          const { data, error } = await supabase.functions.invoke("fal-ai-video", { body });
           if (error) throw new Error(error.message);
           if (data?.error) throw new Error(data.error);
 

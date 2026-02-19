@@ -15,33 +15,22 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { mode, userApiKey, ...params } = body;
+    const { useStoredKey, userApiKey, ...params } = body;
 
     // Determine which FAL key to use and whether to deduct credits
     let falKey: string;
     let shouldDeductCredits = false;
     let userId: string | null = null;
 
-    if (userApiKey) {
-      // User provided their own key — no credit deduction
-      falKey = userApiKey;
-    } else {
-      // Use platform key — must authenticate user and deduct credits
-      const platformKey = Deno.env.get('FAL_KEY');
-      if (!platformKey) {
-        return new Response(JSON.stringify({ error: 'FAL_KEY not configured' }), {
-          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      falKey = platformKey;
-      shouldDeductCredits = true;
+    // Always authenticate the user
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    );
+    const authHeader = req.headers.get("Authorization");
 
-      // Authenticate user and check balance
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-      );
-      const authHeader = req.headers.get("Authorization");
+    if (useStoredKey || (!userApiKey && authHeader)) {
+      // Must authenticate to use stored key or platform key
       if (!authHeader) {
         return new Response(JSON.stringify({ error: 'Authentication required' }), {
           status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -56,24 +45,61 @@ serve(async (req) => {
       }
       userId = userData.user.id;
 
-      // Check credit balance using service role
       const adminClient = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
       );
-      const { data: credits } = await adminClient
-        .from("user_credits")
-        .select("balance")
-        .eq("user_id", userId)
-        .single();
 
-      if (!credits || credits.balance < IMAGE_COST) {
-        return new Response(JSON.stringify({ error: 'Credito insufficiente' }), {
-          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      if (useStoredKey) {
+        // Retrieve user's own API key server-side (never exposed to client)
+        const { data: keyRow } = await adminClient
+          .from("user_api_keys")
+          .select("api_key")
+          .eq("user_id", userId)
+          .eq("provider", "fal")
+          .eq("is_valid", true)
+          .limit(1)
+          .single();
+
+        if (!keyRow?.api_key) {
+          return new Response(JSON.stringify({ error: 'No valid fal.ai key found' }), {
+            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        falKey = keyRow.api_key;
+      } else {
+        // Use platform key — deduct credits
+        const platformKey = Deno.env.get('FAL_KEY');
+        if (!platformKey) {
+          return new Response(JSON.stringify({ error: 'FAL_KEY not configured' }), {
+            status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        falKey = platformKey;
+        shouldDeductCredits = true;
+
+        const { data: credits } = await adminClient
+          .from("user_credits")
+          .select("balance")
+          .eq("user_id", userId)
+          .single();
+
+        if (!credits || credits.balance < IMAGE_COST) {
+          return new Response(JSON.stringify({ error: 'Credito insufficiente' }), {
+            status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
       }
+    } else if (userApiKey) {
+      // Legacy: user provided key directly (deprecated path)
+      falKey = userApiKey;
+    } else {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
+    const { mode } = params as { mode?: string };
     const endpoint = mode === 'edit'
       ? 'https://queue.fal.run/fal-ai/nano-banana-pro/edit'
       : 'https://queue.fal.run/fal-ai/nano-banana-pro';
