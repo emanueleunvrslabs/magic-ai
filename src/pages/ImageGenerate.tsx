@@ -467,7 +467,12 @@ const ResultsArea = ({
         <p className="text-sm mt-1 text-destructive/80">{error}</p>
       </div>
     ) : results.length > 0 ? (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+      <div className={cn(
+        "gap-4 w-full",
+        results.length === 1
+          ? "flex justify-center"
+          : "grid grid-cols-1 sm:grid-cols-2"
+      )}>
         <AnimatePresence>
           {results.map((img, i) => (
             <motion.div
